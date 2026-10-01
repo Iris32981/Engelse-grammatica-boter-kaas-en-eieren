@@ -175,29 +175,44 @@
             box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
 
-        .reset-btn {
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .reset-btn, .new-game-btn {
             background-color: #ff4757;
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 1.3em;
+            padding: 12px 24px;
+            font-size: 1.1em;
             font-weight: 700;
             font-family: 'Fredoka', sans-serif;
             border-radius: 15px;
             cursor: pointer;
-            margin-top: 10px;
-            box-shadow: 0 6px 0px #ff6b81;
+            box-shadow: 0 5px 0px #e12d3e;
             transition: all 0.2s;
-            display: none;
         }
 
-        .reset-btn:hover {
-            background-color: #ff6b81;
+        .new-game-btn {
+            background-color: #10ac84;
+            box-shadow: 0 5px 0px #0e8668;
+        }
+
+        .reset-btn:hover, .new-game-btn:hover {
+            filter: brightness(1.1);
         }
         
-        .reset-btn:active {
-            transform: translateY(6px);
+        .reset-btn:active, .new-game-btn:active {
+            transform: translateY(5px);
             box-shadow: none;
+        }
+
+        .reset-btn {
+            display: none;
         }
         
         .overlay {
@@ -307,7 +322,10 @@
 
         <div class="message" id="message">Klik op een vakje om een vraag te beantwoorden!</div>
         
-        <button class="reset-btn" id="resetBtn">Opnieuw Spelen</button>
+        <div class="action-buttons">
+            <button class="new-game-btn" id="newGameBtn">🔄 Nieuwe Game</button>
+            <button class="reset-btn" id="resetBtn">Opnieuw Spelen</button>
+        </div>
     </div>
 
     <!-- Modaal venster voor de vraag -->
@@ -373,6 +391,7 @@
         const cells = document.querySelectorAll('.cell');
         const messageDisplay = document.getElementById('message');
         const resetBtn = document.getElementById('resetBtn');
+        const newGameBtn = document.getElementById('newGameBtn');
         const statusX = document.getElementById('statusX');
         const statusO = document.getElementById('statusO');
         
@@ -389,6 +408,7 @@
         // --- Initialisatie ---
         cells.forEach(cell => cell.addEventListener('click', handleCellClick));
         resetBtn.addEventListener('click', restartGame);
+        if (newGameBtn) newGameBtn.addEventListener('click', restartGame);
 
         btn1Player.addEventListener('click', () => setMode(true));
         btn2Players.addEventListener('click', () => setMode(false));
