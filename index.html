@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grammatica Boter Kaas en Eieren</title>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --x-color: #ff4757;
+            --o-color: #1dd1a1;
+            --text-color: #2f3542;
+            --bg-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        }
+
+        body {
+            font-family: 'Fredoka', sans-serif;
+            background: var(--bg-gradient);
+            color: var(--text-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+            min-height: 100vh;
+        }
+
+        h1 {
+            color: #5f27cd;
+            text-align: center;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 0px rgba(255,255,255,0.7);
+            margin-bottom: 10px;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            max-width: 800px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.6);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        .status-board {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            max-width: 420px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 15px;
+            box-shadow: 0 6px 0px rgba(0,0,0,0.05);
+        }
+
+        .player-status {
+            font-size: 1.3em;
+            font-weight: 600;
+            opacity: 0.5;
+            transition: all 0.3s;
+        }
+
+        .player-status.active {
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .player-x { color: var(--x-color); }
+        .player-o { color: var(--o-color); }
+
+        .mode-selector {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background-color: #e4e6eb;
+            color: #747d8c;
+            font-size: 1.1em;
+            font-weight: 600;
+            font-family: 'Fredoka', sans-serif;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0px #ced6e0;
+        }
+
+        .mode-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .mode-btn.active {
+            background-color: #5f27cd;
+            color: white;
+            box-shadow: 0 4px 0px #341f97;
+        }
+
+        .board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 15px;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 420px;
+        }
+
+        .cell {
+            background-color: white;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 5em;
+            font-weight: 700;
+            cursor: pointer;
+            user-select: none;
+            aspect-ratio: 1;
+            box-shadow: 0 6px 0px rgba(0,0,0,0.1);
+            transition: all 0.1s ease-in-out;
+            position: relative; /* Voor z-index aanpassingen bij winst */
+        }
+
+        .cell:hover {
+            transform: translateY(2px);
+            box-shadow: 0 4px 0px rgba(0,0,0,0.1);
+            background-color: #f8f9fa;
+        }
+
+        .cell:active {
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .cell.x { 
+            color: var(--x-color); 
+            cursor: default; 
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .cell.o { 
+            color: var(--o-color); 
+            cursor: default; 
+            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .message {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-top: 15px;
+            color: var(--text-color);
+            text-align: center;
+            min-height: 2em;
+            background: white;
+            padding: 10px 25px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .reset-btn {
+            background-color: #ff4757;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.3em;
+            font-weight: 700;
+            font-family: 'Fredoka', sans-serif;
+            border-radius: 15px;
+            cursor: pointer;
+            margin-top: 10px;
+            box-shadow: 0 6px 0px #ff6b81;
+            transition: all 0.2s;
+            display: none;
+        }
+
+        .reset-btn:hover {
+            background-color: #ff6b81;
+        }
+        
+        .reset-btn:active {
+            transform: translateY(6px);
+            box-shadow: none;
+        }
+        
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(47, 53, 66, 0.8);
+            backdrop-filter: blur(5px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal {
+            background: white;
+            padding: 40px;
+            border-radius: 25px;
+            text-align: center;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            animation: modalFadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+            border: 4px solid #f1f2f6;
+        }
+
+        .question-text {
+            font-size: 1.4em;
+            margin-bottom: 25px;
+            line-height: 1.5;
+            color: var(--text-color);
+        }
+
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .option-btn {
+            background-color: #1e90ff;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            font-size: 1.2em;
+            font-family: 'Fredoka', sans-serif;
+            font-weight: 600;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0px #00a8ff;
+            transition: all 0.2s;
+        }
+
+        .option-btn:hover {
+            background-color: #70a1ff;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0px #00a8ff;
+        }
+        
+        .option-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+
+        .option-btn:disabled {
+            background-color: #ced6e0;
+            box-shadow: 0 4px 0px #a4b0be;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Grammatica Boter, Kaas en Eieren</h1>
+    
+    <div class="game-container">
+        <div class="mode-selector">
+            <button id="btn1Player" class="mode-btn active">1 Speler (Computer)</button>
+            <button id="btn2Players" class="mode-btn">2 Spelers</button>
+        </div>
+
+        <div class="status-board">
+            <div id="statusX" class="player-status player-x active">Speler X (Beurt)</div>
+            <div id="statusO" class="player-status player-o">Computer (O)</div>
+        </div>
+
+        <div class="board" id="board">
+            <div class="cell" data-index="0"></div>
+            <div class="cell" data-index="1"></div>
+            <div class="cell" data-index="2"></div>
+            <div class="cell" data-index="3"></div>
+            <div class="cell" data-index="4"></div>
+            <div class="cell" data-index="5"></div>
+            <div class="cell" data-index="6"></div>
+            <div class="cell" data-index="7"></div>
+            <div class="cell" data-index="8"></div>
+        </div>
+
+        <div class="message" id="message">Klik op een vakje om een vraag te beantwoorden!</div>
+        
+        <button class="reset-btn" id="resetBtn">Opnieuw Spelen</button>
+    </div>
+
+    <!-- Modaal venster voor de vraag -->
+    <div class="overlay" id="questionOverlay">
+        <div class="modal">
+            <h2 id="modalPlayerInfo">Speler X, beantwoord deze vraag:</h2>
+            <div class="question-text" id="questionText">De hond ren... hard achter de bal aan.</div>
+            <div class="options" id="optionsContainer">
+                <!-- Knoppen worden hier via JS toegevoegd -->
+            </div>
+            <div id="feedbackMessage" style="margin-top: 15px; font-weight: bold; min-height: 1.5em;"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- Spel Data (Engelse Grammatica Vragen voor Brugklas) ---
+        const questions = [
+            { text: "My brother _______ a new bike.", options: ["have got", "has got", "is got"], correct: "has got" },
+            { text: "_______ you like playing football?", options: ["Do", "Does", "Are"], correct: "Do" },
+            { text: "She _______ to school every day.", options: ["go", "goes", "going"], correct: "goes" },
+            { text: "I _______ very happy today.", options: ["am", "is", "are"], correct: "am" },
+            { text: "We _______ reading a book right now.", options: ["am", "is", "are"], correct: "are" },
+            { text: "Look at _______ cat over there!", options: ["this", "that", "these"], correct: "that" },
+            { text: "There _______ a lot of books in the library.", options: ["is", "are", "am"], correct: "are" },
+            { text: "My birthday is _______ October.", options: ["in", "on", "at"], correct: "in" },
+            { text: "_______ is your favorite teacher?", options: ["Who", "What", "Where"], correct: "Who" },
+            { text: "They _______ watch TV in the morning.", options: ["don't", "doesn't", "aren't"], correct: "don't" },
+            { text: "The book is _______ the table.", options: ["on", "in", "under"], correct: "on" },
+            { text: "He usually _______ up at 7 o'clock.", options: ["wake", "wakes", "waking"], correct: "wakes" },
+            { text: "Can you pass me _______ apple, please?", options: ["a", "an", "the"], correct: "an" },
+            { text: "These are my shoes. Where are _______?", options: ["your", "yours", "you"], correct: "yours" },
+            { text: "_______ she play the piano well?", options: ["Do", "Does", "Is"], correct: "Does" }
+        ];
+
+        // Helper functie om array willekeurig te sorteren (Fisher-Yates)
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+        }
+
+        // --- Spel Logica ---
+        let currentPlayer = 'X';
+        let gameState = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+        let currentCellIndex = null;
+        let availableQuestions = [...questions];
+        
+        let isSinglePlayer = true;
+        let isComputerThinking = false;
+
+        shuffleArray(availableQuestions);
+
+        const winningConditions = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rijen
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Kolommen
+            [0, 4, 8], [2, 4, 6]             // Diagonalen
+        ];
+
+        // --- DOM Elementen ---
+        const board = document.getElementById('board');
+        const cells = document.querySelectorAll('.cell');
+        const messageDisplay = document.getElementById('message');
+        const resetBtn = document.getElementById('resetBtn');
+        const statusX = document.getElementById('statusX');
+        const statusO = document.getElementById('statusO');
+        
+        // Modal Elementen
+        const overlay = document.getElementById('questionOverlay');
+        const modalPlayerInfo = document.getElementById('modalPlayerInfo');
+        const questionText = document.getElementById('questionText');
+        const optionsContainer = document.getElementById('optionsContainer');
+        const feedbackMessage = document.getElementById('feedbackMessage');
+
+        const btn1Player = document.getElementById('btn1Player');
+        const btn2Players = document.getElementById('btn2Players');
+
+        // --- Initialisatie ---
+        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+        resetBtn.addEventListener('click', restartGame);
+
+        btn1Player.addEventListener('click', () => setMode(true));
+        btn2Players.addEventListener('click', () => setMode(false));
+
+        // --- Functies ---
+
+        function setMode(single) {
+            isSinglePlayer = single;
+            btn1Player.classList.toggle('active', single);
+            btn2Players.classList.toggle('active', !single);
+            restartGame();
+        }
+
+        function handleCellClick(e) {
+            if (isComputerThinking) return;
+
+            const clickedCell = e.target;
+            currentCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+            // Controleer of vakje al bezet is of spel voorbij is
+            if (gameState[currentCellIndex] !== '' || !gameActive) {
+                return;
+            }
+
+            // Haal een vraag op
+            if (availableQuestions.length === 0) {
+                // Als vragen op zijn, herlaad ze en schud opnieuw
+                availableQuestions = [...questions];
+                shuffleArray(availableQuestions);
+            }
+            
+            const question = availableQuestions.pop();
+            showQuestionModal(question);
+        }
+
+        function showQuestionModal(question) {
+            // Update modal UI
+            modalPlayerInfo.textContent = `Speler ${currentPlayer}, vul het gat in:`;
+            modalPlayerInfo.className = currentPlayer === 'X' ? 'player-x' : 'player-o';
+            
+            questionText.innerHTML = question.text.replace('_______', '<strong>_______</strong>');
+            
+            // Maak knoppen
+            optionsContainer.innerHTML = '';
+            
+            // Schud opties
+            let shuffledOptions = [...question.options];
+            shuffleArray(shuffledOptions);
+
+            shuffledOptions.forEach(option => {
+                const btn = document.createElement('button');
+                btn.classList.add('option-btn');
+                btn.textContent = option;
+                btn.addEventListener('click', () => handleAnswer(option, question.correct));
+                optionsContainer.appendChild(btn);
+            });
+
+            feedbackMessage.textContent = '';
+            overlay.style.display = 'flex';
+        }
+
+        function handleAnswer(selectedOption, correctOption) {
+            const buttons = optionsContainer.querySelectorAll('.option-btn');
+            buttons.forEach(btn => btn.disabled = true); // Blokkeer verdere klikken
+
+            if (selectedOption === correctOption) {
+                feedbackMessage.style.color = '#1dd1a1';
+                feedbackMessage.textContent = 'Correct! Goed gedaan. ✨';
+                
+                // Wacht even, sluit dan modal en update bord
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    updateCell(cells[currentCellIndex], currentCellIndex);
+                    checkWinCondition();
+                }, 1500);
+
+            } else {
+                feedbackMessage.style.color = '#ff4757';
+                feedbackMessage.textContent = `Helaas, dat is fout. Het goede antwoord was: '${correctOption}'. Je beurt gaat voorbij.`;
+                
+                // Wacht even, sluit modal en wissel speler zonder vakje in te vullen
+                setTimeout(() => {
+                    overlay.style.display = 'none';
+                    switchPlayer();
+                }, 2500);
+            }
+        }
+
+        function updateCell(cell, index) {
+            gameState[index] = currentPlayer;
+            cell.textContent = currentPlayer;
+            cell.classList.add(currentPlayer.toLowerCase());
+        }
+
+        function switchPlayer() {
+            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+            
+            // Update status bord
+            const playerOText = isSinglePlayer ? 'Computer (O)' : 'Speler O';
+            
+            if (currentPlayer === 'X') {
+                statusX.classList.add('active');
+                statusX.textContent = 'Speler X (Beurt)';
+                statusO.classList.remove('active');
+                statusO.textContent = playerOText;
+                isComputerThinking = false;
+            } else {
+                statusO.classList.add('active');
+                statusO.textContent = playerOText + ' (Beurt)';
+                statusX.classList.remove('active');
+                statusX.textContent = 'Speler X';
+                
+                // Als het 1-speler modus is en de computer aan de beurt is
+                if (isSinglePlayer && gameActive) {
+                    isComputerThinking = true;
+                    setTimeout(makeComputerMove, 1000); // Wacht 1 seconde voor een natuurlijk gevoel
+                }
+            }
+        }
+
+        function makeComputerMove() {
+            if (!gameActive) return;
+
+            let emptyIndices = [];
+            for (let i = 0; i < gameState.length; i++) {
+                if (gameState[i] === '') emptyIndices.push(i);
+            }
+
+            if (emptyIndices.length === 0) return;
+
+            let chosenIndex = -1;
+
+            // 1. Kan de computer winnen?
+            chosenIndex = findBestMove('O');
+            
+            // 2. Moet de computer de speler blokkeren?
+            if (chosenIndex === -1) {
+                chosenIndex = findBestMove('X');
+            }
+            
+            // 3. Pak het midden als dat vrij is
+            if (chosenIndex === -1 && gameState[4] === '') {
+                chosenIndex = 4;
+            }
+            
+            // 4. Kies een willekeurig leeg vakje
+            if (chosenIndex === -1) {
+                chosenIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            }
+
+            // Vul het vakje in en controleer of de computer wint
+            updateCell(cells[chosenIndex], chosenIndex);
+            checkWinCondition();
+        }
+
+        function findBestMove(player) {
+            for (let i = 0; i < winningConditions.length; i++) {
+                const [a, b, c] = winningConditions[i];
+                if (gameState[a] === player && gameState[b] === player && gameState[c] === '') return c;
+                if (gameState[a] === player && gameState[c] === player && gameState[b] === '') return b;
+                if (gameState[b] === player && gameState[c] === player && gameState[a] === '') return a;
+            }
+            return -1; // Geen winnende zet gevonden
+        }
+
+        function checkWinCondition() {
+            let roundWon = false;
+            let winningCells = [];
+
+            for (let i = 0; i <= 7; i++) {
+                const winCondition = winningConditions[i];
+                let a = gameState[winCondition[0]];
+                let b = gameState[winCondition[1]];
+                let c = gameState[winCondition[2]];
+
+                if (a === '' || b === '' || c === '') {
+                    continue;
+                }
+                if (a === b && b === c) {
+                    roundWon = true;
+                    winningCells = winCondition;
+                    break;
+                }
+            }
+
+            if (roundWon) {
+                messageDisplay.textContent = `Gefeliciteerd! Speler ${currentPlayer} heeft gewonnen! 🎉`;
+                messageDisplay.style.color = currentPlayer === 'X' ? 'var(--x-color)' : 'var(--o-color)';
+                gameActive = false;
+                
+                winningCells.forEach(index => {
+                    cells[index].style.backgroundColor = '#ffeaa7';
+                    cells[index].style.transform = 'scale(1.05)';
+                    cells[index].style.boxShadow = '0 0 20px rgba(255, 234, 167, 0.8)';
+                    cells[index].style.zIndex = '10';
+                });
+
+                resetBtn.style.display = 'block';
+                return;
+            }
+
+            let roundDraw = !gameState.includes('');
+            if (roundDraw) {
+                messageDisplay.textContent = 'Gelijkspel! Goed gespeeld allebei.';
+                messageDisplay.style.color = '#333';
+                gameActive = false;
+                resetBtn.style.display = 'block';
+                return;
+            }
+
+            switchPlayer();
+        }
+
+        function restartGame() {
+            gameActive = true;
+            currentPlayer = 'X';
+            gameState = ['', '', '', '', '', '', '', '', ''];
+            isComputerThinking = false;
+            
+            const playerOText = isSinglePlayer ? 'Computer (O)' : 'Speler O';
+            
+            statusX.classList.add('active');
+            statusX.textContent = 'Speler X (Beurt)';
+            statusO.classList.remove('active');
+            statusO.textContent = playerOText;
+            
+            messageDisplay.textContent = 'Klik op een vakje om een vraag te beantwoorden!';
+            messageDisplay.style.color = 'var(--text-color)';
+            resetBtn.style.display = 'none';
+            
+            cells.forEach(cell => {
+                cell.textContent = '';
+                cell.classList.remove('x', 'o');
+                cell.style.backgroundColor = 'white';
+                cell.style.transform = 'none';
+                cell.style.boxShadow = '0 6px 0px rgba(0,0,0,0.1)';
+                cell.style.zIndex = '1';
+            });
+            
+            // Schud de resterende of nieuwe vragen
+            shuffleArray(availableQuestions);
+        }
+    </script>
+</body>
+</html>
