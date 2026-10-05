@@ -1,656 +1,1216 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grammatica Boter Kaas en Eieren</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&display=swap" rel="stylesheet">
-    <style>
-        :root {
-            --x-color: #ff4757;
-            --o-color: #1dd1a1;
-            --text-color: #2f3542;
-            --bg-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grammatica Boter Kaas en Eieren</title>
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  
+  <style>
+    :root {
+      --x-color: #ff4757;
+      --x-dark: #ff6b81;
+      --o-color: #2e86de;
+      --o-dark: #1b4f72;
+      --accent: #5f27cd;
+      --accent-hover: #341f97;
+      --text-color: #2f3542;
+      --bg-gradient: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+      --glass-bg: rgba(255, 255, 255, 0.75);
+    }
 
-        body {
-            font-family: 'Fredoka', sans-serif;
-            background: var(--bg-gradient);
-            color: var(--text-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-            margin: 0;
-            min-height: 100vh;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        h1 {
-            color: #5f27cd;
-            text-align: center;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 0px rgba(255,255,255,0.7);
-            margin-bottom: 10px;
-        }
+    body {
+      font-family: 'Fredoka', sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-color);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 15px;
+      margin: 0;
+      min-height: 100vh;
+      line-height: 1.4;
+    }
 
-        .game-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 20px;
-            max-width: 800px;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.6);
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
-        }
+    header {
+      text-align: center;
+      margin-bottom: 15px;
+    }
 
-        .status-board {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            max-width: 420px;
-            background: white;
-            padding: 15px 25px;
-            border-radius: 15px;
-            box-shadow: 0 6px 0px rgba(0,0,0,0.05);
-        }
+    h1 {
+      color: var(--accent);
+      text-align: center;
+      font-size: 2.2rem;
+      margin: 5px 0;
+      text-shadow: 2px 2px 0px rgba(255, 255, 255, 0.8);
+    }
 
-        .player-status {
-            font-size: 1.3em;
-            font-weight: 600;
-            opacity: 0.5;
-            transition: all 0.3s;
-        }
+    p.subtitle {
+      color: #57606f;
+      margin: 0;
+      font-size: 1.05rem;
+      font-weight: 500;
+    }
 
-        .player-status.active {
-            opacity: 1;
-            transform: scale(1.1);
-        }
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      max-width: 650px;
+      width: 100%;
+      background: var(--glass-bg);
+      padding: 24px;
+      border-radius: 24px;
+      box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+      backdrop-filter: blur(12px);
+      border: 2px solid rgba(255, 255, 255, 0.8);
+    }
 
-        .player-x { color: var(--x-color); }
-        .player-o { color: var(--o-color); }
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      max-width: 440px;
+    }
 
-        .mode-selector {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 10px;
-            width: 100%;
-            max-width: 420px;
-        }
+    .level-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 12px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-left: 6px;
+    }
 
-        .mode-btn {
-            flex: 1;
-            padding: 12px;
-            border: none;
-            background-color: #e4e6eb;
-            color: #747d8c;
-            font-size: 1.1em;
-            font-weight: 600;
-            font-family: 'Fredoka', sans-serif;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all 0.2s;
-            box-shadow: 0 4px 0px #ced6e0;
-        }
+    .level-1-tag { background: #e3f9e5; color: #10ac84; border: 1px solid #1dd1a1; }
+    .level-2-tag { background: #fff4e6; color: #ff9f43; border: 1px solid #fabca1; }
+    .level-3-tag { background: #ffe0e3; color: #ee5253; border: 1px solid #ff6b6b; }
 
-        .mode-btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
 
-        .mode-btn.active {
-            background-color: #5f27cd;
-            color: white;
-            box-shadow: 0 4px 0px #341f97;
-        }
+    .control-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #57606f;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
 
-        .board {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            background-color: rgba(255, 255, 255, 0.5);
-            padding: 15px;
-            border-radius: 20px;
-            width: 100%;
-            max-width: 420px;
-        }
+    select, button {
+      font-family: 'Fredoka', sans-serif;
+    }
 
-        .cell {
-            background-color: white;
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 5em;
-            font-weight: 700;
-            cursor: pointer;
-            user-select: none;
-            aspect-ratio: 1;
-            box-shadow: 0 6px 0px rgba(0,0,0,0.1);
-            transition: all 0.1s ease-in-out;
-            position: relative; /* Voor z-index aanpassingen bij winst */
-        }
+    select.custom-select {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 12px;
+      border: 2px solid #e4e6eb;
+      background-color: white;
+      color: var(--text-color);
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      outline: none;
+      transition: all 0.2s;
+      box-shadow: 0 3px 0px #ced6e0;
+    }
 
-        .cell:hover {
-            transform: translateY(2px);
-            box-shadow: 0 4px 0px rgba(0,0,0,0.1);
-            background-color: #f8f9fa;
-        }
+    select.custom-select:focus {
+      border-color: var(--accent);
+    }
 
-        .cell:active {
-            transform: translateY(6px);
-            box-shadow: none;
-        }
+    .mode-selector {
+      display: flex;
+      gap: 8px;
+    }
 
-        @keyframes popIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            70% { transform: scale(1.1); }
-            100% { transform: scale(1); opacity: 1; }
-        }
+    .mode-btn {
+      flex: 1;
+      padding: 10px;
+      border: none;
+      background-color: white;
+      color: #747d8c;
+      font-size: 0.95rem;
+      font-weight: 600;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      box-shadow: 0 4px 0px #ced6e0;
+      border: 2px solid #e4e6eb;
+    }
 
-        .cell.x { 
-            color: var(--x-color); 
-            cursor: default; 
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        .cell.o { 
-            color: var(--o-color); 
-            cursor: default; 
-            animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
+    .mode-btn.active {
+      background-color: var(--accent);
+      color: white;
+      border-color: var(--accent);
+      box-shadow: 0 4px 0px var(--accent-hover);
+    }
 
-        .message {
-            font-size: 1.5em;
-            font-weight: 600;
-            margin-top: 15px;
-            color: var(--text-color);
-            text-align: center;
-            min-height: 2em;
-            background: white;
-            padding: 10px 25px;
-            border-radius: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
-        }
+    .status-board {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      max-width: 440px;
+      background: white;
+      padding: 12px 20px;
+      border-radius: 16px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
 
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 10px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
+    .player-status {
+      font-size: 1.1rem;
+      font-weight: 700;
+      opacity: 0.4;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
 
-        .reset-btn, .new-game-btn {
-            background-color: #ff4757;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            font-size: 1.1em;
-            font-weight: 700;
-            font-family: 'Fredoka', sans-serif;
-            border-radius: 15px;
-            cursor: pointer;
-            box-shadow: 0 5px 0px #e12d3e;
-            transition: all 0.2s;
-        }
+    .player-status.active {
+      opacity: 1;
+      transform: scale(1.08);
+    }
 
-        .new-game-btn {
-            background-color: #10ac84;
-            box-shadow: 0 5px 0px #0e8668;
-        }
+    .player-x { color: var(--x-color); }
+    .player-o { color: var(--o-color); }
 
-        .reset-btn:hover, .new-game-btn:hover {
-            filter: brightness(1.1);
-        }
-        
-        .reset-btn:active, .new-game-btn:active {
-            transform: translateY(5px);
-            box-shadow: none;
-        }
+    .score-badge {
+      background: #f1f2f6;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: #2f3542;
+    }
 
-        .reset-btn {
-            display: none;
-        }
-        
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(47, 53, 66, 0.8);
-            backdrop-filter: blur(5px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      background-color: rgba(255, 255, 255, 0.6);
+      padding: 14px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+    }
 
-        @keyframes modalFadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+    .cell {
+      background-color: white;
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 4.5rem;
+      font-weight: 700;
+      cursor: pointer;
+      user-select: none;
+      aspect-ratio: 1;
+      box-shadow: 0 6px 0px #dcdde1;
+      transition: all 0.15s ease;
+      position: relative;
+    }
 
-        .modal {
-            background: white;
-            padding: 40px;
-            border-radius: 25px;
-            text-align: center;
-            max-width: 500px;
-            width: 90%;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
-            animation: modalFadeIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-            border: 4px solid #f1f2f6;
-        }
+    .cell:hover:not(.x):not(.o) {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 0px #dcdde1;
+      background-color: #f8f9fa;
+    }
 
-        .question-text {
-            font-size: 1.4em;
-            margin-bottom: 25px;
-            line-height: 1.5;
-            color: var(--text-color);
-        }
+    .cell:active:not(.x):not(.o) {
+      transform: translateY(4px);
+      box-shadow: 0 2px 0px #dcdde1;
+    }
 
-        .options {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 15px;
-        }
+    @keyframes popIn {
+      0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+      70% { transform: scale(1.15) rotate(5deg); }
+      100% { transform: scale(1) rotate(0deg); opacity: 1; }
+    }
 
-        .option-btn {
-            background-color: #1e90ff;
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            font-size: 1.2em;
-            font-family: 'Fredoka', sans-serif;
-            font-weight: 600;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 0px #00a8ff;
-            transition: all 0.2s;
-        }
+    .cell.x {
+      color: var(--x-color);
+      cursor: default;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
 
-        .option-btn:hover {
-            background-color: #70a1ff;
-            transform: translateY(-2px);
-            box-shadow: 0 6px 0px #00a8ff;
-        }
-        
-        .option-btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
+    .cell.o {
+      color: var(--o-color);
+      cursor: default;
+      animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
 
-        .option-btn:disabled {
-            background-color: #ced6e0;
-            box-shadow: 0 4px 0px #a4b0be;
-            cursor: not-allowed;
-            transform: none;
-        }
-    </style>
+    .cell.winning-cell {
+      background-color: #ffeaa7 !important;
+      box-shadow: 0 0 20px rgba(253, 203, 110, 0.8) !important;
+      animation: pulseWin 0.8s infinite alternate ease-in-out;
+      z-index: 5;
+    }
+
+    @keyframes pulseWin {
+      from { transform: scale(1); }
+      to { transform: scale(1.06); }
+    }
+
+    .message {
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: var(--text-color);
+      text-align: center;
+      min-height: 2.8em;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: white;
+      padding: 10px 20px;
+      border-radius: 20px;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 12px;
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .btn {
+      flex: 1;
+      border: none;
+      padding: 12px 18px;
+      font-size: 1rem;
+      font-weight: 700;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background-color: #10ac84;
+      color: white;
+      box-shadow: 0 5px 0px #0e8668;
+    }
+
+    .btn-primary:hover {
+      background-color: #1dd1a1;
+      transform: translateY(-2px);
+      box-shadow: 0 7px 0px #0e8668;
+    }
+
+    .btn-secondary {
+      background-color: #747d8c;
+      color: white;
+      box-shadow: 0 5px 0px #57606f;
+    }
+
+    .btn-secondary:hover {
+      background-color: #a4b0be;
+    }
+
+    .btn:active {
+      transform: translateY(4px) !important;
+      box-shadow: 0 1px 0px transparent !important;
+    }
+
+    .stats-summary {
+      display: flex;
+      gap: 15px;
+      font-size: 0.85rem;
+      color: #57606f;
+      font-weight: 600;
+    }
+
+    .overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(47, 53, 66, 0.75);
+      backdrop-filter: blur(6px);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      padding: 15px;
+    }
+
+    .modal {
+      background: white;
+      padding: 30px;
+      border-radius: 24px;
+      text-align: center;
+      max-width: 520px;
+      width: 100%;
+      box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+      animation: modalSlideUp 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      border: 4px solid #f1f2f6;
+    }
+
+    @keyframes modalSlideUp {
+      from { opacity: 0; transform: translateY(30px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .modal-tag {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #f1f2f6;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 10px;
+    }
+
+    .modal-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
+
+    .question-box {
+      background: #f8f9fa;
+      padding: 18px;
+      border-radius: 16px;
+      font-size: 1.25rem;
+      margin-bottom: 20px;
+      line-height: 1.5;
+      color: var(--text-color);
+      border: 2px dashed #c8d6e5;
+    }
+
+    .question-box u {
+      text-decoration-color: var(--accent);
+      text-decoration-thickness: 3px;
+    }
+
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .option-btn {
+      background-color: #54a0ff;
+      color: white;
+      border: none;
+      padding: 14px 16px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      border-radius: 14px;
+      cursor: pointer;
+      box-shadow: 0 4px 0px #2e86de;
+      transition: all 0.2s;
+    }
+
+    .option-btn:hover:not(:disabled) {
+      background-color: #2e86de;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 0px #1b4f72;
+    }
+
+    .option-btn:active:not(:disabled) {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0px transparent;
+    }
+
+    .option-btn:disabled {
+      cursor: not-allowed;
+      opacity: 0.7;
+    }
+
+    .option-btn.correct-btn {
+      background-color: #1dd1a1 !important;
+      box-shadow: 0 4px 0px #10ac84 !important;
+      color: white;
+    }
+
+    .option-btn.wrong-btn {
+      background-color: #ff4757 !important;
+      box-shadow: 0 4px 0px #c0392b !important;
+      color: white;
+    }
+
+    .explanation-card {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      display: none;
+      text-align: left;
+      line-height: 1.4;
+      animation: fadeIn 0.3s forwards;
+    }
+
+    .explanation-card.success {
+      background-color: #e3fcfe;
+      color: #0e8668;
+      border: 1px solid #1dd1a1;
+    }
+
+    .explanation-card.error {
+      background-color: #ffe0e3;
+      color: #c0392b;
+      border: 1px solid #ff4757;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 480px) {
+      h1 { font-size: 1.8rem; }
+      .game-container { padding: 16px; }
+      .cell { font-size: 3.5rem; }
+      .controls-grid { grid-template-columns: 1fr; }
+    }
+  </style>
 </head>
 <body>
 
-    <h1>Grammatica Boter, Kaas en Eieren</h1>
+  <header>
+    <h1>Grammatica Boter, Kaas & Eieren</h1>
+    <p class="subtitle">Oefen Engelse grammatica voor de Brugklas (VMBO / HAVO / VWO)</p>
+  </header>
+
+  <div class="game-container">
     
-    <div class="game-container">
+    <!-- Controls Section -->
+    <div class="controls-grid">
+      <div class="control-group">
+        <label class="control-label" for="levelSelect">Niveau / Level</label>
+        <select id="levelSelect" class="custom-select">
+          <option value="1">🌱 Level 1: Makkelijk (VMBO)</option>
+          <option value="2" selected>🌿 Level 2: Gemiddeld (HAVO)</option>
+          <option value="3">🔥 Level 3: Uitdagend (VWO)</option>
+        </select>
+      </div>
+
+      <div class="control-group">
+        <label class="control-label">Spelmodus</label>
         <div class="mode-selector">
-            <button id="btn1Player" class="mode-btn active">1 Speler (Computer)</button>
-            <button id="btn2Players" class="mode-btn">2 Spelers</button>
+          <button id="btn1Player" class="mode-btn active">🤖 Computer</button>
+          <button id="btn2Players" class="mode-btn">👥 2 Spelers</button>
         </div>
+      </div>
 
-        <div class="status-board">
-            <div id="statusX" class="player-status player-x active">Speler X (Beurt)</div>
-            <div id="statusO" class="player-status player-o">Computer (O)</div>
-        </div>
-
-        <div class="board" id="board">
-            <div class="cell" data-index="0"></div>
-            <div class="cell" data-index="1"></div>
-            <div class="cell" data-index="2"></div>
-            <div class="cell" data-index="3"></div>
-            <div class="cell" data-index="4"></div>
-            <div class="cell" data-index="5"></div>
-            <div class="cell" data-index="6"></div>
-            <div class="cell" data-index="7"></div>
-            <div class="cell" data-index="8"></div>
-        </div>
-
-        <div class="message" id="message">Klik op een vakje om een vraag te beantwoorden!</div>
-        
-        <div class="action-buttons">
-            <button class="new-game-btn" id="newGameBtn">🔄 Nieuwe Game</button>
-            <button class="reset-btn" id="resetBtn">Opnieuw Spelen</button>
-        </div>
+      <div class="control-group" style="grid-column: span 2;">
+        <label class="control-label" for="categorySelect">Onderwerp</label>
+        <select id="categorySelect" class="custom-select">
+          <option value="all">🌟 Alles gemengd</option>
+          <option value="present_simple">Present Simple (o.t.t.)</option>
+          <option value="present_continuous">Present Continuous (be + -ing)</option>
+          <option value="past_simple">Past Simple (o.v.t.)</option>
+          <option value="present_perfect">Present Perfect (voltooid)</option>
+          <option value="comparatives">Vergroottrap & Trappen van vergelijking</option>
+          <option value="pronouns">Voornaamwoorden & Preposities</option>
+        </select>
+      </div>
     </div>
 
-    <!-- Modaal venster voor de vraag -->
-    <div class="overlay" id="questionOverlay">
-        <div class="modal">
-            <h2 id="modalPlayerInfo">Speler X, beantwoord deze vraag:</h2>
-            <div class="question-text" id="questionText">De hond ren... hard achter de bal aan.</div>
-            <div class="options" id="optionsContainer">
-                <!-- Knoppen worden hier via JS toegevoegd -->
-            </div>
-            <div id="feedbackMessage" style="margin-top: 15px; font-weight: bold; min-height: 1.5em;"></div>
-        </div>
+    <!-- Status Bar -->
+    <div class="status-board">
+      <div id="statusX" class="player-status player-x active">
+        <span>X Speler X</span>
+        <span class="score-badge" id="scoreX">0 winst</span>
+      </div>
+      <div id="statusO" class="player-status player-o">
+        <span id="playerOName">O Computer</span>
+        <span class="score-badge" id="scoreO">0 winst</span>
+      </div>
     </div>
 
-    <script>
-        // --- Spel Data (Engelse Grammatica Vragen voor Brugklas) ---
-        const questions = [
-            { text: "My brother _______ a new bike.", options: ["have got", "has got", "is got"], correct: "has got" },
-            { text: "_______ you like playing football?", options: ["Do", "Does", "Are"], correct: "Do" },
-            { text: "She _______ to school every day.", options: ["go", "goes", "going"], correct: "goes" },
-            { text: "I _______ very happy today.", options: ["am", "is", "are"], correct: "am" },
-            { text: "We _______ reading a book right now.", options: ["am", "is", "are"], correct: "are" },
-            { text: "Look at _______ cat over there!", options: ["this", "that", "these"], correct: "that" },
-            { text: "There _______ a lot of books in the library.", options: ["is", "are", "am"], correct: "are" },
-            { text: "My birthday is _______ October.", options: ["in", "on", "at"], correct: "in" },
-            { text: "_______ is your favorite teacher?", options: ["Who", "What", "Where"], correct: "Who" },
-            { text: "They _______ watch TV in the morning.", options: ["don't", "doesn't", "aren't"], correct: "don't" },
-            { text: "The book is _______ the table.", options: ["on", "in", "under"], correct: "on" },
-            { text: "He usually _______ up at 7 o'clock.", options: ["wake", "wakes", "waking"], correct: "wakes" },
-            { text: "Can you pass me _______ apple, please?", options: ["a", "an", "the"], correct: "an" },
-            { text: "These are my shoes. Where are _______?", options: ["your", "yours", "you"], correct: "yours" },
-            { text: "_______ she play the piano well?", options: ["Do", "Does", "Is"], correct: "Does" }
-        ];
+    <!-- Tic Tac Toe Board -->
+    <div class="board" id="board">
+      <div class="cell" data-index="0"></div>
+      <div class="cell" data-index="1"></div>
+      <div class="cell" data-index="2"></div>
+      <div class="cell" data-index="3"></div>
+      <div class="cell" data-index="4"></div>
+      <div class="cell" data-index="5"></div>
+      <div class="cell" data-index="6"></div>
+      <div class="cell" data-index="7"></div>
+      <div class="cell" data-index="8"></div>
+    </div>
 
-        // Helper functie om array willekeurig te sorteren (Fisher-Yates)
-        function shuffleArray(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
+    <!-- Message Display -->
+    <div class="message" id="message">Klik op een leeg vakje om een vraag te beantwoorden!</div>
+
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+      <button class="btn btn-primary" id="newGameBtn">🔄 Nieuw Spel</button>
+      <button class="btn btn-secondary" id="resetScoreBtn">🧹 Score Wissen</button>
+    </div>
+
+    <!-- Game Statistics Footer -->
+    <div class="stats-summary">
+      <span>Beantwoord: <strong id="statTotal">0</strong></span>
+      <span>Goed: <strong id="statCorrect">0</strong></span>
+      <span>Nauwkeurigheid: <strong id="statAccuracy">0%</strong></span>
+    </div>
+
+  </div>
+
+  <div class="overlay" id="questionOverlay">
+    <div class="modal">
+      <span class="modal-tag" id="modalCategoryTag">Grammatica</span>
+      <span id="modalLevelBadge" class="level-badge level-1-tag">Level 1</span>
+      <div class="modal-title" id="modalPlayerInfo">Speler X, vul het juiste antwoord in:</div>
+      
+      <div class="question-box" id="questionText">
+        Loading question...
+      </div>
+
+      <div class="options-grid" id="optionsContainer">
+        <!-- Option buttons inserted dynamically -->
+      </div>
+
+      <div class="explanation-card" id="explanationCard">
+        <!-- Feedback and rule explanation -->
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Comprehensive Brugklas English Grammar Questions Database categorized by Level (1, 2, 3)
+    const questionDatabase = [
+      // LEVEL 1 - EASY (VMBO / Basis)
+      {
+        level: 1,
+        category: "present_simple",
+        categoryName: "Present Simple",
+        text: "My brother _______ a new bicycle.",
+        options: ["have got", "has got", "is got"],
+        correct: "has got",
+        rule: "Bij 'he/she/it' (my brother = he) gebruik je <b>has got</b>."
+      },
+      {
+        level: 1,
+        category: "present_simple",
+        categoryName: "Present Simple",
+        text: "_______ you like playing football on Saturdays?",
+        options: ["Do", "Does", "Are"],
+        correct: "Do",
+        rule: "Vragen in de Present Simple met 'you' beginnen met <b>Do</b>."
+      },
+      {
+        level: 1,
+        category: "present_simple",
+        categoryName: "Present Simple",
+        text: "She _______ to school by bike every morning.",
+        options: ["go", "goes", "going"],
+        correct: "goes",
+        rule: "De 'shit-regel' (he/she/it): voeg <b>-s</b> of <b>-es</b> toe aan het werkwoord."
+      },
+      {
+        level: 1,
+        category: "present_continuous",
+        categoryName: "Present Continuous",
+        text: "I _______ my homework at the moment.",
+        options: ["am doing", "do", "is doing"],
+        correct: "am doing",
+        rule: "Met 'I' vorm je de Present Continuous met <b>am + werkwoord-ing</b>."
+      },
+      {
+        level: 1,
+        category: "past_simple",
+        categoryName: "Past Simple",
+        text: "Yesterday, I _______ my grandmother in Amsterdam.",
+        options: ["visit", "visited", "was visit"],
+        correct: "visited",
+        rule: "Verleden tijd (Past Simple) van regelmatige werkwoorden krijgt <b>-ed</b>."
+      },
+      {
+        level: 1,
+        category: "pronouns",
+        categoryName: "Voornaamwoorden & Preposities",
+        text: "My birthday is _______ October.",
+        options: ["in", "on", "at"],
+        correct: "in",
+        rule: "Bij maanden gebruik je het voorzetsel <b>in</b> (in October, in May)."
+      },
+      {
+        level: 1,
+        category: "pronouns",
+        categoryName: "Voornaamwoorden & Preposities",
+        text: "We always go to bed _______ 10 o'clock.",
+        options: ["in", "on", "at"],
+        correct: "at",
+        rule: "Bij exacte tijdstippen gebruik je altijd <b>at</b> (at 10 o'clock)."
+      },
+      {
+        level: 1,
+        category: "pronouns",
+        categoryName: "Voornaamwoorden & Preposities",
+        text: "Can you pass me _______ apple, please?",
+        options: ["a", "an", "the"],
+        correct: "an",
+        rule: "Voor een klinkerklank (a, e, i, o, u) gebruik je <b>an</b>."
+      },
+
+      // LEVEL 2 - MEDIUM (HAVO / Brugklas)
+      {
+        level: 2,
+        category: "present_simple",
+        categoryName: "Present Simple",
+        text: "They _______ watch TV in the afternoon.",
+        options: ["don't", "doesn't", "aren't"],
+        correct: "don't",
+        rule: "Ontkenning met 'they' in de Present Simple is <b>don't</b> (do not)."
+      },
+      {
+        level: 2,
+        category: "present_continuous",
+        categoryName: "Present Continuous",
+        text: "Listen! Somebody _______ at the door.",
+        options: ["knocks", "is knocking", "are knocking"],
+        correct: "is knocking",
+        rule: "'Listen!' geeft aan dat iets op dit moment plaatsvindt: Present Continuous (be + -ing)."
+      },
+      {
+        level: 2,
+        category: "past_simple",
+        categoryName: "Past Simple",
+        text: "We _______ to Spain two years ago.",
+        options: ["go", "goed", "went"],
+        correct: "went",
+        rule: "'Go' is een onregelmatig werkwoord. De verleden tijd is <b>went</b>."
+      },
+      {
+        level: 2,
+        category: "past_simple",
+        categoryName: "Past Simple",
+        text: "He _______ a new smartphone last week.",
+        options: ["buyed", "bought", "buys"],
+        correct: "bought",
+        rule: "'Buy' is onregelmatig: buy - <b>bought</b> - bought."
+      },
+      {
+        level: 2,
+        category: "comparatives",
+        categoryName: "Vergelijkingen",
+        text: "An elephant is _______ than a tiger.",
+        options: ["bigger", "more big", "biggest"],
+        correct: "bigger",
+        rule: "Korte woorden krijgen <b>-er</b> bij een vergelijking (+ dubbele medeklinker bij big)."
+      },
+      {
+        level: 2,
+        category: "comparatives",
+        categoryName: "Vergelijkingen",
+        text: "This computer game is _______ than the old one.",
+        options: ["more exciting", "excitinger", "most exciting"],
+        correct: "more exciting",
+        rule: "Lange woorden (3+ lettergrepen) krijgen <b>more</b> voor de vergelijking."
+      },
+      {
+        level: 2,
+        category: "present_perfect",
+        categoryName: "Present Perfect",
+        text: "I _______ my keys! I can't open the door.",
+        options: ["have lost", "lost", "has lost"],
+        correct: "have lost",
+        rule: "Present Perfect (have/has + voltooid deelwoord) gebruikt voor resultaat in het heden."
+      },
+
+      // LEVEL 3 - HARD (VWO / Tweetalig)
+      {
+        level: 3,
+        category: "present_perfect",
+        categoryName: "Present Perfect",
+        text: "She _______ lived in London since 2020.",
+        options: ["has", "have", "was"],
+        correct: "has",
+        rule: "Bij 'she' gebruik je <b>has + voltooid deelwoord</b>. 'Since' geeft het beginpunt aan."
+      },
+      {
+        level: 3,
+        category: "present_perfect",
+        categoryName: "Present Perfect vs Past Simple",
+        text: "We _______ to Paris last summer.",
+        options: ["went", "have gone", "were gone"],
+        correct: "went",
+        rule: "'Last summer' is een afgesloten tijdstip in het verleden, dus gebruik je de <b>Past Simple</b>."
+      },
+      {
+        level: 3,
+        category: "comparatives",
+        categoryName: "Vergelijkingen",
+        text: "This is the _______ mistake you could ever make.",
+        options: ["worst", "badder", "worstest"],
+        correct: "worst",
+        rule: "Onregelmatige overtreffende trap: bad - worse - <b>the worst</b>."
+      },
+      {
+        level: 3,
+        category: "present_simple",
+        categoryName: "Present Simple vs Continuous",
+        text: "Water _______ at 100 degrees Celsius.",
+        options: ["boils", "is boiling", "boil"],
+        correct: "boils",
+        rule: "Feiten en natuurwetten staan altijd in de <b>Present Simple</b>."
+      },
+      {
+        level: 3,
+        category: "pronouns",
+        categoryName: "Voornaamwoorden",
+        text: "Neither of the students _______ done their homework.",
+        options: ["has", "have", "are"],
+        correct: "has",
+        rule: "'Neither' is taalkundig enkelvoud, dus gebruik je <b>has</b>."
+      },
+      {
+        level: 3,
+        category: "past_simple",
+        categoryName: "Irregular Verbs",
+        text: "The bird _______ away into the clouds.",
+        options: ["flew", "flyed", "flown"],
+        correct: "flew",
+        rule: "Verleden tijd van 'fly' is <b>flew</b> (fly - flew - flown)."
+      }
+    ];
+
+    // DOM Elements Declarations
+    const levelSelect = document.getElementById('levelSelect');
+    const categorySelect = document.getElementById('categorySelect');
+    const btn1Player = document.getElementById('btn1Player');
+    const btn2Players = document.getElementById('btn2Players');
+    const statusX = document.getElementById('statusX');
+    const statusO = document.getElementById('statusO');
+    const scoreXEl = document.getElementById('scoreX');
+    const scoreOEl = document.getElementById('scoreO');
+    const playerOName = document.getElementById('playerOName');
+    const cells = document.querySelectorAll('.cell');
+    const messageDisplay = document.getElementById('message');
+    const newGameBtn = document.getElementById('newGameBtn');
+    const resetScoreBtn = document.getElementById('resetScoreBtn');
+    const statTotal = document.getElementById('statTotal');
+    const statCorrect = document.getElementById('statCorrect');
+    const statAccuracy = document.getElementById('statAccuracy');
+    
+    // Modal Elements
+    const overlay = document.getElementById('questionOverlay');
+    const modalCategoryTag = document.getElementById('modalCategoryTag');
+    const modalLevelBadge = document.getElementById('modalLevelBadge');
+    const modalPlayerInfo = document.getElementById('modalPlayerInfo');
+    const questionText = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const explanationCard = document.getElementById('explanationCard');
+
+    // Game State
+    let currentLevel = 2;
+    let currentPlayer = 'X';
+    let gameState = ['', '', '', '', '', '', '', '', ''];
+    let gameActive = true;
+    let currentCellIndex = null;
+    let availableQuestions = [];
+    let isSinglePlayer = true;
+    let isComputerThinking = false;
+
+    let scoreX = 0;
+    let scoreO = 0;
+    let totalQuestionsAnswered = 0;
+    let totalCorrectAnswers = 0;
+
+    const winningConditions = [
+      [0, 1, 2], [3, 4, 5], [6, 7, 8],
+      [0, 3, 6], [1, 4, 7], [2, 5, 8],
+      [0, 4, 8], [2, 4, 6]
+    ];
+
+    // Web Audio Synthesizer for Sound Effects
+    const soundFX = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+      },
+      playTone(freq, type, duration, gainVal = 0.1) {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = type;
+          osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+          gain.gain.setValueAtTime(gainVal, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + duration);
+        } catch(e) {}
+      },
+      playPop() { this.playTone(400, 'sine', 0.08); },
+      playCorrect() {
+        this.playTone(523.25, 'sine', 0.1);
+        setTimeout(() => this.playTone(659.25, 'sine', 0.12), 100);
+        setTimeout(() => this.playTone(783.99, 'sine', 0.18), 200);
+      },
+      playWrong() {
+        this.playTone(220, 'sawtooth', 0.12);
+        setTimeout(() => this.playTone(175, 'sawtooth', 0.2), 120);
+      },
+      playWin() {
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          setTimeout(() => this.playTone(freq, 'triangle', 0.22), idx * 110);
+        });
+      }
+    };
+
+    function initGame() {
+      cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+      newGameBtn.addEventListener('click', restartGame);
+      resetScoreBtn.addEventListener('click', resetAllScores);
+
+      btn1Player.addEventListener('click', () => setMode(true));
+      btn2Players.addEventListener('click', () => setMode(false));
+      categorySelect.addEventListener('change', restartGame);
+      levelSelect.addEventListener('change', () => {
+        currentLevel = parseInt(levelSelect.value);
+        restartGame();
+      });
+
+      filterAndPrepareQuestions();
+      restartGame();
+    }
+
+    function setMode(single) {
+      isSinglePlayer = single;
+      btn1Player.classList.toggle('active', single);
+      btn2Players.classList.toggle('active', !single);
+      playerOName.textContent = single ? 'O Computer' : 'O Speler O';
+      restartGame();
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+    }
+
+    function filterAndPrepareQuestions() {
+      const selectedCategory = categorySelect.value;
+      currentLevel = parseInt(levelSelect.value);
+
+      availableQuestions = questionDatabase.filter(q => {
+        const matchesLevel = q.level === currentLevel;
+        const matchesCategory = selectedCategory === 'all' || q.category === selectedCategory;
+        return matchesLevel && matchesCategory;
+      });
+
+      if (availableQuestions.length === 0) {
+        availableQuestions = questionDatabase.filter(q => q.level === currentLevel);
+      }
+
+      shuffleArray(availableQuestions);
+    }
+
+    function handleCellClick(e) {
+      if (isComputerThinking || !gameActive) return;
+
+      const clickedCell = e.currentTarget || e.target;
+      currentCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+      if (gameState[currentCellIndex] !== '') return;
+
+      if (availableQuestions.length === 0) {
+        filterAndPrepareQuestions();
+      }
+
+      const question = availableQuestions.pop();
+      showQuestionModal(question);
+    }
+
+    function showQuestionModal(question) {
+      modalCategoryTag.textContent = question.categoryName || "Grammatica";
+      
+      modalLevelBadge.textContent = `Level ${question.level}`;
+      modalLevelBadge.className = `level-badge level-${question.level}-tag`;
+
+      modalPlayerInfo.textContent = `Speler ${currentPlayer}, vul het juiste antwoord in:`;
+      modalPlayerInfo.className = `modal-title ${currentPlayer === 'X' ? 'player-x' : 'player-o'}`;
+
+      const formattedText = question.text.replace('_______', '<u>_______</u>');
+      questionText.innerHTML = formattedText;
+
+      optionsContainer.innerHTML = '';
+      explanationCard.style.display = 'none';
+
+      let shuffledOptions = [...question.options];
+      shuffleArray(shuffledOptions);
+
+      shuffledOptions.forEach(option => {
+        const btn = document.createElement('button');
+        btn.classList.add('option-btn');
+        btn.textContent = option;
+        btn.addEventListener('click', () => handleAnswer(option, question, btn));
+        optionsContainer.appendChild(btn);
+      });
+
+      overlay.style.display = 'flex';
+    }
+
+    function handleAnswer(selectedOption, question, clickedBtn) {
+      const optionButtons = optionsContainer.querySelectorAll('.option-btn');
+      optionButtons.forEach(btn => btn.disabled = true);
+
+      totalQuestionsAnswered++;
+
+      if (selectedOption === question.correct) {
+        totalCorrectAnswers++;
+        clickedBtn.classList.add('correct-btn');
+        explanationCard.className = 'explanation-card success';
+        explanationCard.innerHTML = `<strong>✨ Goed geantwoord!</strong><br>${question.rule}`;
+        explanationCard.style.display = 'block';
+        soundFX.playCorrect();
+
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          updateCell(cells[currentCellIndex], currentCellIndex);
+          checkWinCondition();
+          updateStatsUI();
+        }, 1200);
+      } else {
+        clickedBtn.classList.add('wrong-btn');
+        optionButtons.forEach(btn => {
+          if (btn.textContent === question.correct) {
+            btn.classList.add('correct-btn');
+          }
+        });
+        explanationCard.className = 'explanation-card error';
+        explanationCard.innerHTML = `<strong>❌ Helaas, dat is onjuist!</strong> Het goede antwoord is: <b>${question.correct}</b>.<br><br><b>Uitleg:</b> ${question.rule}`;
+        explanationCard.style.display = 'block';
+        soundFX.playWrong();
+
+        setTimeout(() => {
+          overlay.style.display = 'none';
+          updateStatsUI();
+          switchPlayer();
+        }, 2200);
+      }
+    }
+
+    function updateCell(cell, index) {
+      gameState[index] = currentPlayer;
+      cell.textContent = currentPlayer === 'X' ? 'X' : 'O';
+      cell.classList.add(currentPlayer.toLowerCase());
+    }
+
+    function switchPlayer() {
+      currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+
+      const playerOText = isSinglePlayer ? 'O Computer' : 'O Speler O';
+
+      if (currentPlayer === 'X') {
+        statusX.classList.add('active');
+        statusO.classList.remove('active');
+        isComputerThinking = false;
+        messageDisplay.textContent = isSinglePlayer 
+          ? 'Jouw beurt! Klik op een vakje om een vraag te beantwoorden.' 
+          : 'Speler X is aan de beurt!';
+      } else {
+        statusO.classList.add('active');
+        statusX.classList.remove('active');
+
+        if (isSinglePlayer && gameActive) {
+          isComputerThinking = true;
+          messageDisplay.textContent = '🤖 Computer denkt na...';
+          setTimeout(makeComputerMove, 800);
+        } else {
+          messageDisplay.textContent = 'Speler O is aan de beurt!';
+        }
+      }
+    }
+
+    function makeComputerMove() {
+      if (!gameActive) return;
+
+      let emptyIndices = [];
+      for (let i = 0; i < gameState.length; i++) {
+        if (gameState[i] === '') emptyIndices.push(i);
+      }
+
+      if (emptyIndices.length === 0) return;
+
+      let chosenIndex = -1;
+
+      // Level 1 AI: Mostly random moves
+      if (currentLevel === 1 && Math.random() < 0.5) {
+        chosenIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      }
+
+      // Level 2 & 3 AI logic
+      if (chosenIndex === -1) {
+        // 1. Winning move
+        chosenIndex = findBestMove('O');
+
+        // 2. Blocking move
+        if (chosenIndex === -1) {
+          chosenIndex = findBestMove('X');
         }
 
-        // --- Spel Logica ---
-        let currentPlayer = 'X';
-        let gameState = ['', '', '', '', '', '', '', '', ''];
-        let gameActive = true;
-        let currentCellIndex = null;
-        let availableQuestions = [...questions];
-        
-        let isSinglePlayer = true;
-        let isComputerThinking = false;
-
-        shuffleArray(availableQuestions);
-
-        const winningConditions = [
-            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rijen
-            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Kolommen
-            [0, 4, 8], [2, 4, 6]             // Diagonalen
-        ];
-
-        // --- DOM Elementen ---
-        const board = document.getElementById('board');
-        const cells = document.querySelectorAll('.cell');
-        const messageDisplay = document.getElementById('message');
-        const resetBtn = document.getElementById('resetBtn');
-        const newGameBtn = document.getElementById('newGameBtn');
-        const statusX = document.getElementById('statusX');
-        const statusO = document.getElementById('statusO');
-        
-        // Modal Elementen
-        const overlay = document.getElementById('questionOverlay');
-        const modalPlayerInfo = document.getElementById('modalPlayerInfo');
-        const questionText = document.getElementById('questionText');
-        const optionsContainer = document.getElementById('optionsContainer');
-        const feedbackMessage = document.getElementById('feedbackMessage');
-
-        const btn1Player = document.getElementById('btn1Player');
-        const btn2Players = document.getElementById('btn2Players');
-
-        // --- Initialisatie ---
-        cells.forEach(cell => cell.addEventListener('click', handleCellClick));
-        resetBtn.addEventListener('click', restartGame);
-        if (newGameBtn) newGameBtn.addEventListener('click', restartGame);
-
-        btn1Player.addEventListener('click', () => setMode(true));
-        btn2Players.addEventListener('click', () => setMode(false));
-
-        // --- Functies ---
-
-        function setMode(single) {
-            isSinglePlayer = single;
-            btn1Player.classList.toggle('active', single);
-            btn2Players.classList.toggle('active', !single);
-            restartGame();
+        // Level 3 AI strategic choices
+        if (currentLevel === 3 && chosenIndex === -1) {
+          if (gameState[4] === '') {
+            chosenIndex = 4;
+          } else {
+            const corners = [0, 2, 6, 8].filter(c => gameState[c] === '');
+            if (corners.length > 0) {
+              chosenIndex = corners[Math.floor(Math.random() * corners.length)];
+            }
+          }
         }
 
-        function handleCellClick(e) {
-            if (isComputerThinking) return;
-
-            const clickedCell = e.target;
-            currentCellIndex = parseInt(clickedCell.getAttribute('data-index'));
-
-            // Controleer of vakje al bezet is of spel voorbij is
-            if (gameState[currentCellIndex] !== '' || !gameActive) {
-                return;
-            }
-
-            // Haal een vraag op
-            if (availableQuestions.length === 0) {
-                // Als vragen op zijn, herlaad ze en schud opnieuw
-                availableQuestions = [...questions];
-                shuffleArray(availableQuestions);
-            }
-            
-            const question = availableQuestions.pop();
-            showQuestionModal(question);
+        if (chosenIndex === -1 && gameState[4] === '') {
+          chosenIndex = 4;
         }
 
-        function showQuestionModal(question) {
-            // Update modal UI
-            modalPlayerInfo.textContent = `Speler ${currentPlayer}, vul het gat in:`;
-            modalPlayerInfo.className = currentPlayer === 'X' ? 'player-x' : 'player-o';
-            
-            questionText.innerHTML = question.text.replace('_______', '<strong>_______</strong>');
-            
-            // Maak knoppen
-            optionsContainer.innerHTML = '';
-            
-            // Schud opties
-            let shuffledOptions = [...question.options];
-            shuffleArray(shuffledOptions);
+        if (chosenIndex === -1) {
+          chosenIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+        }
+      }
 
-            shuffledOptions.forEach(option => {
-                const btn = document.createElement('button');
-                btn.classList.add('option-btn');
-                btn.textContent = option;
-                btn.addEventListener('click', () => handleAnswer(option, question.correct));
-                optionsContainer.appendChild(btn);
-            });
+      soundFX.playPop();
+      updateCell(cells[chosenIndex], chosenIndex);
+      checkWinCondition();
+    }
 
-            feedbackMessage.textContent = '';
-            overlay.style.display = 'flex';
+    function findBestMove(player) {
+      for (let i = 0; i < winningConditions.length; i++) {
+        const [a, b, c] = winningConditions[i];
+        if (gameState[a] === player && gameState[b] === player && gameState[c] === '') return c;
+        if (gameState[a] === player && gameState[c] === player && gameState[b] === '') return b;
+        if (gameState[b] === player && gameState[c] === player && gameState[a] === '') return a;
+      }
+      return -1;
+    }
+
+    function checkWinCondition() {
+      let roundWon = false;
+      let winningCells = [];
+
+      for (let i = 0; i < winningConditions.length; i++) {
+        const winCondition = winningConditions[i];
+        let a = gameState[winCondition[0]];
+        let b = gameState[winCondition[1]];
+        let c = gameState[winCondition[2]];
+
+        if (a === '' || b === '' || c === '') continue;
+
+        if (a === b && b === c) {
+          roundWon = true;
+          winningCells = winCondition;
+          break;
+        }
+      }
+
+      if (roundWon) {
+        gameActive = false;
+        soundFX.playWin();
+
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 }
+          });
         }
 
-        function handleAnswer(selectedOption, correctOption) {
-            const buttons = optionsContainer.querySelectorAll('.option-btn');
-            buttons.forEach(btn => btn.disabled = true); // Blokkeer verdere klikken
+        const winnerName = currentPlayer === 'X' ? 'Speler X' : (isSinglePlayer ? 'Computer' : 'Speler O');
+        messageDisplay.textContent = `🎉 Gefeliciteerd! ${winnerName} heeft gewonnen!`;
+        messageDisplay.style.color = currentPlayer === 'X' ? 'var(--x-color)' : 'var(--o-color)';
 
-            if (selectedOption === correctOption) {
-                feedbackMessage.style.color = '#1dd1a1';
-                feedbackMessage.textContent = 'Correct! Goed gedaan. ✨';
-                
-                // Wacht even, sluit dan modal en update bord
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    updateCell(cells[currentCellIndex], currentCellIndex);
-                    checkWinCondition();
-                }, 1500);
+        winningCells.forEach(index => {
+          cells[index].classList.add('winning-cell');
+        });
 
-            } else {
-                feedbackMessage.style.color = '#ff4757';
-                feedbackMessage.textContent = `Helaas, dat is fout. Het goede antwoord was: '${correctOption}'. Je beurt gaat voorbij.`;
-                
-                // Wacht even, sluit modal en wissel speler zonder vakje in te vullen
-                setTimeout(() => {
-                    overlay.style.display = 'none';
-                    switchPlayer();
-                }, 2500);
-            }
+        if (currentPlayer === 'X') {
+          scoreX++;
+          scoreXEl.textContent = `${scoreX} winst`;
+        } else {
+          scoreO++;
+          scoreOEl.textContent = `${scoreO} winst`;
         }
 
-        function updateCell(cell, index) {
-            gameState[index] = currentPlayer;
-            cell.textContent = currentPlayer;
-            cell.classList.add(currentPlayer.toLowerCase());
-        }
+        return;
+      }
 
-        function switchPlayer() {
-            currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-            
-            // Update status bord
-            const playerOText = isSinglePlayer ? 'Computer (O)' : 'Speler O';
-            
-            if (currentPlayer === 'X') {
-                statusX.classList.add('active');
-                statusX.textContent = 'Speler X (Beurt)';
-                statusO.classList.remove('active');
-                statusO.textContent = playerOText;
-                isComputerThinking = false;
-            } else {
-                statusO.classList.add('active');
-                statusO.textContent = playerOText + ' (Beurt)';
-                statusX.classList.remove('active');
-                statusX.textContent = 'Speler X';
-                
-                // Als het 1-speler modus is en de computer aan de beurt is
-                if (isSinglePlayer && gameActive) {
-                    isComputerThinking = true;
-                    setTimeout(makeComputerMove, 1000); // Wacht 1 seconde voor een natuurlijk gevoel
-                }
-            }
-        }
+      let roundDraw = !gameState.includes('');
+      if (roundDraw) {
+        messageDisplay.textContent = '🤝 Gelijkspel! Goed gespeeld allebei.';
+        messageDisplay.style.color = 'var(--text-color)';
+        gameActive = false;
+        return;
+      }
 
-        function makeComputerMove() {
-            if (!gameActive) return;
+      switchPlayer();
+    }
 
-            let emptyIndices = [];
-            for (let i = 0; i < gameState.length; i++) {
-                if (gameState[i] === '') emptyIndices.push(i);
-            }
+    function updateStatsUI() {
+      statTotal.textContent = totalQuestionsAnswered;
+      statCorrect.textContent = totalCorrectAnswers;
+      const accuracy = totalQuestionsAnswered > 0 ? Math.round((totalCorrectAnswers / totalQuestionsAnswered) * 100) : 0;
+      statAccuracy.textContent = `${accuracy}%`;
+    }
 
-            if (emptyIndices.length === 0) return;
+    function restartGame() {
+      gameActive = true;
+      currentPlayer = 'X';
+      gameState = ['', '', '', '', '', '', '', '', ''];
+      isComputerThinking = false;
 
-            let chosenIndex = -1;
+      statusX.classList.add('active');
+      statusO.classList.remove('active');
 
-            // 1. Kan de computer winnen?
-            chosenIndex = findBestMove('O');
-            
-            // 2. Moet de computer de speler blokkeren?
-            if (chosenIndex === -1) {
-                chosenIndex = findBestMove('X');
-            }
-            
-            // 3. Pak het midden als dat vrij is
-            if (chosenIndex === -1 && gameState[4] === '') {
-                chosenIndex = 4;
-            }
-            
-            // 4. Kies een willekeurig leeg vakje
-            if (chosenIndex === -1) {
-                chosenIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
-            }
+      messageDisplay.textContent = 'Klik op een vakje om een vraag te beantwoorden!';
+      messageDisplay.style.color = 'var(--text-color)';
 
-            // Vul het vakje in en controleer of de computer wint
-            updateCell(cells[chosenIndex], chosenIndex);
-            checkWinCondition();
-        }
+      cells.forEach(cell => {
+        cell.textContent = '';
+        cell.className = 'cell';
+      });
 
-        function findBestMove(player) {
-            for (let i = 0; i < winningConditions.length; i++) {
-                const [a, b, c] = winningConditions[i];
-                if (gameState[a] === player && gameState[b] === player && gameState[c] === '') return c;
-                if (gameState[a] === player && gameState[c] === player && gameState[b] === '') return b;
-                if (gameState[b] === player && gameState[c] === player && gameState[a] === '') return a;
-            }
-            return -1; // Geen winnende zet gevonden
-        }
+      filterAndPrepareQuestions();
+    }
 
-        function checkWinCondition() {
-            let roundWon = false;
-            let winningCells = [];
+    function resetAllScores() {
+      scoreX = 0;
+      scoreO = 0;
+      totalQuestionsAnswered = 0;
+      totalCorrectAnswers = 0;
+      scoreXEl.textContent = '0 winst';
+      scoreOEl.textContent = '0 winst';
+      updateStatsUI();
+      restartGame();
+    }
 
-            for (let i = 0; i <= 7; i++) {
-                const winCondition = winningConditions[i];
-                let a = gameState[winCondition[0]];
-                let b = gameState[winCondition[1]];
-                let c = gameState[winCondition[2]];
-
-                if (a === '' || b === '' || c === '') {
-                    continue;
-                }
-                if (a === b && b === c) {
-                    roundWon = true;
-                    winningCells = winCondition;
-                    break;
-                }
-            }
-
-            if (roundWon) {
-                messageDisplay.textContent = `Gefeliciteerd! Speler ${currentPlayer} heeft gewonnen! 🎉`;
-                messageDisplay.style.color = currentPlayer === 'X' ? 'var(--x-color)' : 'var(--o-color)';
-                gameActive = false;
-                
-                winningCells.forEach(index => {
-                    cells[index].style.backgroundColor = '#ffeaa7';
-                    cells[index].style.transform = 'scale(1.05)';
-                    cells[index].style.boxShadow = '0 0 20px rgba(255, 234, 167, 0.8)';
-                    cells[index].style.zIndex = '10';
-                });
-
-                resetBtn.style.display = 'block';
-                return;
-            }
-
-            let roundDraw = !gameState.includes('');
-            if (roundDraw) {
-                messageDisplay.textContent = 'Gelijkspel! Goed gespeeld allebei.';
-                messageDisplay.style.color = '#333';
-                gameActive = false;
-                resetBtn.style.display = 'block';
-                return;
-            }
-
-            switchPlayer();
-        }
-
-        function restartGame() {
-            gameActive = true;
-            currentPlayer = 'X';
-            gameState = ['', '', '', '', '', '', '', '', ''];
-            isComputerThinking = false;
-            
-            const playerOText = isSinglePlayer ? 'Computer (O)' : 'Speler O';
-            
-            statusX.classList.add('active');
-            statusX.textContent = 'Speler X (Beurt)';
-            statusO.classList.remove('active');
-            statusO.textContent = playerOText;
-            
-            messageDisplay.textContent = 'Klik op een vakje om een vraag te beantwoorden!';
-            messageDisplay.style.color = 'var(--text-color)';
-            resetBtn.style.display = 'none';
-            
-            cells.forEach(cell => {
-                cell.textContent = '';
-                cell.classList.remove('x', 'o');
-                cell.style.backgroundColor = 'white';
-                cell.style.transform = 'none';
-                cell.style.boxShadow = '0 6px 0px rgba(0,0,0,0.1)';
-                cell.style.zIndex = '1';
-            });
-            
-            // Schud de resterende of nieuwe vragen
-            shuffleArray(availableQuestions);
-        }
-    </script>
+    // Initialize application on page load
+    window.onload = initGame;
+  </script>
 </body>
 </html>
