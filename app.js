@@ -1,4 +1,4 @@
-// Uitgebreide Vragenbank met zowel meerkeuze ('mc') als open typ-vragen ('input')
+// Ruim opgezette vragenbank (meerkeuze & open typvragen)
 const questionDatabase = [
   // LEVEL 1 - BRUGKLAS
   { level: 1, type: "mc", category: "present_simple", categoryName: "Present Simple", text: "My brother _______ a new bicycle.", options: ["have got", "has got", "is got"], correct: "has got", rule: "Bij 'he/she/it' (my brother = he) gebruik je <b>has got</b>." },
@@ -6,9 +6,11 @@ const questionDatabase = [
   { level: 1, type: "mc", category: "present_simple", categoryName: "Present Simple", text: "_______ you like playing football on Saturdays?", options: ["Do", "Does", "Are"], correct: "Do", rule: "Vragen in de Present Simple met 'you' beginnen met <b>Do</b>." },
   { level: 1, type: "input", category: "present_simple", categoryName: "Present Simple", text: "Tom _______ (watch) television every evening.", correct: ["watches"], rule: "Werkwoorden die eindigen op -ch krijgen <b>-es</b> bij he/she/it." },
   { level: 1, type: "mc", category: "present_continuous", categoryName: "Present Continuous", text: "I _______ my homework at the moment.", options: ["am doing", "do", "is doing"], correct: "am doing", rule: "Met 'I' vorm je de Present Continuous met <b>am + werkwoord-ing</b>." },
+  { level: 1, type: "input", category: "present_continuous", categoryName: "Present Continuous", text: "Look! The children _______ (play) outside.", correct: ["are playing"], rule: "Present Continuous: <b>am/is/are + werkwoord-ing</b>." },
   { level: 1, type: "input", category: "past_simple", categoryName: "Past Simple", text: "Yesterday, I _______ (visit) my grandmother.", correct: ["visited"], rule: "Verleden tijd van regelmatige werkwoorden krijgt <b>-ed</b>." },
   { level: 1, type: "mc", category: "pronouns", categoryName: "Voornaamwoorden & Preposities", text: "My birthday is _______ October.", options: ["in", "on", "at"], correct: "in", rule: "Bij maanden gebruik je het voorzetsel <b>in</b> (in October, in May)." },
   { level: 1, type: "mc", category: "pronouns", categoryName: "Voornaamwoorden & Preposities", text: "Can you pass me _______ apple, please?", options: ["a", "an", "the"], correct: "an", rule: "Voor een klinkerklank (a, e, i, o, u) gebruik je <b>an</b>." },
+  { level: 1, type: "input", category: "pronouns", categoryName: "Voornaamwoorden & Preposities", text: "We always meet _______ (at/on/in) 3 o'clock.", correct: ["at"], rule: "Bij specifieke tijdstippen gebruik je <b>at</b>." },
 
   // LEVEL 2 - TWEEDE KLAS
   { level: 2, type: "mc", category: "present_simple", categoryName: "Present Simple", text: "They _______ watch TV in the afternoon.", options: ["don't", "doesn't", "aren't"], correct: "don't", rule: "Ontkenning met 'they' in de Present Simple is <b>don't</b> (do not)." },
@@ -16,8 +18,10 @@ const questionDatabase = [
   { level: 2, type: "mc", category: "present_continuous", categoryName: "Present Continuous", text: "Listen! Somebody _______ at the door.", options: ["knocks", "is knocking", "are knocking"], correct: "is knocking", rule: "'Listen!' geeft aan dat iets NU plaatsvindt: Present Continuous (be + -ing)." },
   { level: 2, type: "input", category: "past_simple", categoryName: "Past Simple", text: "We _______ (go) to Spain two years ago.", correct: ["went"], rule: "'Go' is een onregelmatig werkwoord. De verleden tijd is <b>went</b>." },
   { level: 2, type: "input", category: "past_simple", categoryName: "Past Simple", text: "He _______ (buy) a new smartphone last week.", correct: ["bought"], rule: "'Buy' is onregelmatig: buy - <b>bought</b> - bought." },
+  { level: 2, type: "mc", category: "past_simple", categoryName: "Past Simple", text: "They _______ see the movie yesterday.", options: ["didn't", "don't", "weren't"], correct: "didn't", rule: "Ontkenning in de verleden tijd maak je met <b>didn't + hele werkwoord</b>." },
   { level: 2, type: "mc", category: "comparatives", categoryName: "Vergelijkingen", text: "An elephant is _______ than a tiger.", options: ["bigger", "more big", "biggest"], correct: "bigger", rule: "Korte woorden krijgen <b>-er</b> bij een vergelijking (+ dubbele medeklinker bij big)." },
   { level: 2, type: "input", category: "comparatives", categoryName: "Vergelijkingen", text: "A car is _______ (fast) than a bicycle.", correct: ["faster"], rule: "Voeg <b>-er</b> toe voor de vergroottrap bij korte bijvoeglijke naamwoorden." },
+  { level: 2, type: "input", category: "comparatives", categoryName: "Vergelijkingen", text: "This game is _______ (expensive) than that one.", correct: ["more expensive"], rule: "Bij lange woorden gebruik je <b>more</b> voor het bijvoeglijk naamwoord." },
 
   // LEVEL 3 - DERDE KLAS
   { level: 3, type: "mc", category: "present_perfect", categoryName: "Present Perfect", text: "She _______ lived in London since 2020.", options: ["has", "have", "was"], correct: "has", rule: "Bij 'she' gebruik je <b>has + voltooid deelwoord</b>. 'Since' geeft het beginpunt aan." },
@@ -26,10 +30,12 @@ const questionDatabase = [
   { level: 3, type: "mc", category: "present_perfect", categoryName: "Present Perfect vs Past Simple", text: "We _______ to Paris last summer.", options: ["went", "have gone", "were gone"], correct: "went", rule: "'Last summer' is een afgesloten tijdstip in het verleden, dus gebruik je de <b>Past Simple</b>." },
   { level: 3, type: "input", category: "comparatives", categoryName: "Vergelijkingen", text: "This is the _______ (bad) mistake you could make.", correct: ["worst"], rule: "Onregelmatige overtreffende trap: bad - worse - <b>the worst</b>." },
   { level: 3, type: "mc", category: "advanced", categoryName: "Conditionals", text: "If it rains tomorrow, we _______ stay indoors.", options: ["will", "would", "had"], correct: "will", rule: "First Conditional: <b>If + Present Simple, will + hele werkwoord</b>." },
+  { level: 3, type: "input", category: "advanced", categoryName: "Conditionals", text: "If I have enough money, I _______ (buy) that coat.", correct: ["will buy"], rule: "First Conditional: <b>will + hele werkwoord</b> in de hoofdzin." },
 
   // LEVEL 4 - BOVENBOUW
   { level: 4, type: "input", category: "advanced", categoryName: "Past Perfect", text: "By the time we arrived, the movie _______ (start) already.", correct: ["had started"], rule: "Past Perfect: <b>had + voltooid deelwoord</b> voor handelingen vóór een ander moment in het verleden." },
-  { level: 4, category: "advanced", categoryName: "Passive Voice", text: "The new library _______ built by workers last year.", options: ["was", "is", "has been"], correct: "was", rule: "Lijdende vorm (Passive) in het verleden: <b>was/were + voltooid deelwoord</b>." },
+  { level: 4, type: "mc", category: "advanced", categoryName: "Passive Voice", text: "The new library _______ built by workers last year.", options: ["was", "is", "has been"], correct: "was", rule: "Lijdende vorm (Passive) in het verleden: <b>was/were + voltooid deelwoord</b>." },
+  { level: 4, type: "input", category: "advanced", categoryName: "Passive Voice", text: "English _______ (speak) all over the world.", correct: ["is spoken"], rule: "Passive in de tegenwoordige tijd: <b>am/is/are + voltooid deelwoord</b>." },
   { level: 4, type: "input", category: "advanced", categoryName: "Conditionals", text: "If I _______ (be) you, I would accept that job offer.", correct: ["were"], rule: "Second Conditional (hypothetisch): 'If I <b>were</b> you'." },
   { level: 4, type: "mc", category: "advanced", categoryName: "Conditionals", text: "Had I known about the party, I _______ come.", options: ["would have", "will have", "would"], correct: "would have", rule: "Third Conditional: <b>Had + voltooid deelwoord, would have + voltooid deelwoord</b>." },
   { level: 4, type: "input", category: "advanced", categoryName: "Gerunds & Infinitives", text: "He admitted _______ (steal) the bicycle.", correct: ["stealing"], rule: "Na het werkwoord 'admit' volgt een <b>gerund</b> (werkwoord + -ing)." }
@@ -534,14 +540,14 @@ function switchPlayer() {
     if (isSinglePlayer && gameActive) {
       isComputerThinking = true;
       if (messageDisplay) messageDisplay.textContent = '🤖 Computer denkt na...';
-      setTimeout(makeComputerMove, 900);
+      setTimeout(makeComputerMove, 800);
     } else {
       if (messageDisplay) messageDisplay.textContent = `${playerOName} is aan de beurt!`;
     }
   }
 }
 
-// MINDER SLIMME ROBOT AI (Maakt veel meer menselijke foutjes!)
+// HEEL MAKKELIJKE ROBOT AI (Kiest in 90% van de gevallen gewoon zomaar een vakje!)
 function makeComputerMove() {
   if (!gameActive) return;
 
@@ -554,21 +560,16 @@ function makeComputerMove() {
 
   let move = null;
 
-  // Robot slimheid instellingen:
-  // 1. Slechts 35% kans dat hij ziet dat hij zelf 3 op een rij kan maken.
-  // 2. Slechts 25% kans dat hij ziet dat jij 3 op een rij gaat maken (en je blokkeert).
-  const noticeWin = Math.random() < 0.35;
-  const noticeBlock = Math.random() < 0.25;
+  // 90% kans dat de robot TOTAAL willekeurig kiest (en je kansen negeert)
+  const playsRandomly = Math.random() < 0.90;
 
-  if (noticeWin) {
-    move = findBestMove('O'); // Probeer te winnen
+  if (!playsRandomly) {
+    // Alleen in de overige 10% van de gevallen kijkt hij heel kort of hij ergens kan winnen of blokkeren
+    move = findBestMove('O');
+    if (move === null) move = findBestMove('X');
   }
 
-  if (move === null && noticeBlock) {
-    move = findBestMove('X'); // Blokkeer de speler
-  }
-
-  // Als de robot het niet zag of er geen directe kansen waren: kiest hij willekeurig!
+  // Als hij willekeurig kiest of geen zet vond: neem gewoon zomaar een leeg vakje
   if (move === null) {
     move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
   }
