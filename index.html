@@ -2,36 +2,66 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Grammatica Boter Kaas en Eieren</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Grammatica Boter, Kaas & Eieren</title>
   
-  <!-- Lettertype & Confetti Bibliotheek -->
   <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   
-  <!-- Koppeling naar het CSS bestand -->
   <link rel="stylesheet" href="styles.css">
-  
-  <!-- Koppeling naar het JavaScript bestand -->
   <script src="app.js" defer></script>
 </head>
 <body>
 
+  <!-- Startscherm & Instructies Modal -->
+  <div class="overlay" id="startModal" style="display: flex;">
+    <div class="modal start-modal-content">
+      <div class="modal-header">
+        <h2>🎮 Hoe werkt de game?</h2>
+      </div>
+      
+      <div class="instructions-list">
+        <div class="instruction-item">
+          <span class="step-num">1</span>
+          <p><strong>Kies je niveau & spelmodus:</strong> Selecteer je klas (Brugklas t/m Bovenbouw) en speel tegen de computer of een klasgenoot!</p>
+        </div>
+        <div class="instruction-item">
+          <span class="step-num">2</span>
+          <p><strong>Kies een vakje:</strong> Klik op een leeg vakje om een Engelse grammatica vraag te openen.</p>
+        </div>
+        <div class="instruction-item">
+          <span class="step-num">3</span>
+          <p><strong>Beantwoord juist:</strong> Kies het goede antwoord. Heb je het goed? Dan wordt het vakje van jou (X of O)!</p>
+        </div>
+        <div class="instruction-item">
+          <span class="step-num">4</span>
+          <p><strong>Win het spel:</strong> Haal 3 op een rij (horizontaal, verticaal of diagonaal) om te winnen!</p>
+        </div>
+      </div>
+
+      <button class="btn btn-primary btn-large" id="startGameBtn">🚀 Start het Spel!</button>
+    </div>
+  </div>
+
   <header>
-    <h1>Grammatica Boter, Kaas & Eieren</h1>
-    <p class="subtitle">Oefen Engelse grammatica voor de Brugklas (VMBO / HAVO / VWO)</p>
+    <div class="header-content">
+      <h1>Grammatica Boter, Kaas & Eieren</h1>
+      <p class="subtitle">Oefen Engelse grammatica voor de Middelbare School</p>
+    </div>
+    <button id="soundToggleBtn" class="sound-btn" title="Geluid in-/uitschakelen">🔊</button>
   </header>
 
-  <div class="game-container">
+  <main class="game-container">
     
-    <!-- Controls Section -->
-    <div class="controls-grid">
+    <!-- Bedieningspaneel -->
+    <section class="controls-grid">
       <div class="control-group">
-        <label class="control-label" for="levelSelect">Niveau / Level</label>
+        <label class="control-label" for="levelSelect">Niveau / Klas</label>
         <select id="levelSelect" class="custom-select">
-          <option value="1">🌱 Level 1: Makkelijk (VMBO)</option>
-          <option value="2" selected>🌿 Level 2: Gemiddeld (HAVO)</option>
-          <option value="3">🔥 Level 3: Uitdagend (VWO)</option>
+          <option value="1" selected>🌱 Level 1: Brugklas</option>
+          <option value="2">🌿 Level 2: Tweede klas</option>
+          <option value="3">🔥 Level 3: Derde klas</option>
+          <option value="4">⚡ Level 4: Bovenbouw</option>
         </select>
       </div>
 
@@ -43,7 +73,7 @@
         </div>
       </div>
 
-      <div class="control-group" style="grid-column: span 2;">
+      <div class="control-group">
         <label class="control-label" for="categorySelect">Onderwerp</label>
         <select id="categorySelect" class="custom-select">
           <option value="all">🌟 Alles gemengd</option>
@@ -53,12 +83,23 @@
           <option value="present_perfect">Present Perfect (voltooid)</option>
           <option value="comparatives">Vergroottrap & Trappen van vergelijking</option>
           <option value="pronouns">Voornaamwoorden & Preposities</option>
+          <option value="advanced">Bovenbouw Grammatica (Passives, Conditionals)</option>
         </select>
       </div>
-    </div>
 
-    <!-- Status Bar -->
-    <div class="status-board">
+      <div class="control-group">
+        <label class="control-label" for="timerSelect">⏱️ Tijdsdruk per vraag</label>
+        <select id="timerSelect" class="custom-select">
+          <option value="0">Geen timer</option>
+          <option value="15" selected>15 Seconden</option>
+          <option value="10">10 Seconden</option>
+          <option value="5">5 Seconden (Snel!)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Scorebord -->
+    <section class="status-board">
       <div id="statusX" class="player-status player-x active">
         <span>X Speler X</span>
         <span class="score-badge" id="scoreX">0 winst</span>
@@ -67,59 +108,75 @@
         <span id="playerOName">O Computer</span>
         <span class="score-badge" id="scoreO">0 winst</span>
       </div>
-    </div>
+    </section>
 
-    <!-- Tic Tac Toe Board -->
-    <div class="board" id="board">
-      <div class="cell" data-index="0"></div>
-      <div class="cell" data-index="1"></div>
-      <div class="cell" data-index="2"></div>
-      <div class="cell" data-index="3"></div>
-      <div class="cell" data-index="4"></div>
-      <div class="cell" data-index="5"></div>
-      <div class="cell" data-index="6"></div>
-      <div class="cell" data-index="7"></div>
-      <div class="cell" data-index="8"></div>
-    </div>
+    <!-- Speelbord -->
+    <section class="board" id="board" aria-label="Boter kaas en eieren speelbord">
+      <button class="cell" data-index="0" aria-label="Vakje 1"></button>
+      <button class="cell" data-index="1" aria-label="Vakje 2"></button>
+      <button class="cell" data-index="2" aria-label="Vakje 3"></button>
+      <button class="cell" data-index="3" aria-label="Vakje 4"></button>
+      <button class="cell" data-index="4" aria-label="Vakje 5"></button>
+      <button class="cell" data-index="5" aria-label="Vakje 6"></button>
+      <button class="cell" data-index="6" aria-label="Vakje 7"></button>
+      <button class="cell" data-index="7" aria-label="Vakje 8"></button>
+      <button class="cell" data-index="8" aria-label="Vakje 9"></button>
+    </section>
 
-    <!-- Message Display -->
+    <!-- Berichtweergave -->
     <div class="message" id="message">Klik op een leeg vakje om een vraag te beantwoorden!</div>
 
-    <!-- Action Buttons -->
-    <div class="action-buttons">
+    <!-- Actieknoppen -->
+    <section class="action-buttons">
       <button class="btn btn-primary" id="newGameBtn">🔄 Nieuw Spel</button>
+      <button class="btn btn-secondary" id="helpBtn">❓ Instructies</button>
       <button class="btn btn-secondary" id="resetScoreBtn">🧹 Score Wissen</button>
-    </div>
+    </section>
 
-    <!-- Game Statistics Footer -->
-    <div class="stats-summary">
+    <!-- Statistieken -->
+    <footer class="stats-summary">
       <span>Beantwoord: <strong id="statTotal">0</strong></span>
       <span>Goed: <strong id="statCorrect">0</strong></span>
       <span>Nauwkeurigheid: <strong id="statAccuracy">0%</strong></span>
-    </div>
+    </footer>
 
-  </div>
+  </main>
 
-  <!-- Modal voor Vragen -->
+  <!-- Modal voor Grammatica Vragen -->
   <div class="overlay" id="questionOverlay">
     <div class="modal">
-      <span class="modal-tag" id="modalCategoryTag">Grammatica</span>
-      <span id="modalLevelBadge" class="level-badge level-1-tag">Level 1</span>
+      <div class="modal-top-bar">
+        <span class="modal-tag" id="modalCategoryTag">Grammatica</span>
+        <span id="modalLevelBadge" class="level-badge level-1-tag">Brugklas</span>
+      </div>
+
+      <!-- Tijdsdruk balk -->
+      <div class="timer-container" id="timerBarContainer" style="display: none;">
+        <div class="timer-header">
+          <span>Resterende tijd:</span>
+          <strong id="timerDisplay">15s</strong>
+        </div>
+        <div class="timer-bar-bg">
+          <div class="timer-bar-fill" id="timerBar"></div>
+        </div>
+      </div>
+
       <div class="modal-title" id="modalPlayerInfo">Speler X, vul het juiste antwoord in:</div>
       
       <div class="question-box" id="questionText">
         Vraag wordt geladen...
       </div>
 
-      <div class="options-grid" id="optionsContainer">
-        <!-- Antwoordknoppen worden hier dynamisch ingeladen -->
-      </div>
+      <div class="options-grid" id="optionsContainer"></div>
 
-      <div class="explanation-card" id="explanationCard">
-        <!-- Uitleg en feedback -->
-      </div>
+      <div class="explanation-card" id="explanationCard"></div>
+
+      <!-- Didactische Herhaalknop -->
+      <button class="btn btn-retry" id="retryQuestionBtn" style="display: none;">
+        🔁 Probeer een vergelijkbare oefenvraag!
+      </button>
     </div>
   </div>
 
 </body>
-</html> 
+</html>
