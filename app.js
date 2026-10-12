@@ -28,7 +28,7 @@ const questionDatabase = [
   { level: 4, category: "advanced", categoryName: "Passive Voice", text: "The new library _______ built by workers last year.", options: ["was", "is", "has been"], correct: "was", rule: "Lijdende vorm (Passive) in het verleden: <b>was/were + voltooid deelwoord</b>." },
   { level: 4, category: "advanced", categoryName: "Conditionals", text: "If I _______ you, I would accept that job offer immediately.", options: ["were", "am", "would be"], correct: "were", rule: "Second Conditional (hypothetisch): 'If I <b>were</b> you' (subjunctive mood)." },
   { level: 4, category: "advanced", categoryName: "Conditionals", text: "Had I known about the party, I _______ come.", options: ["would have", "will have", "would"], correct: "would have", rule: "Third Conditional (onmogelijk verleden): <b>Had + voltooid deelwoord, would have + voltooid deelwoord</b>." },
-  { level: 4, category: "advanced", categoryName: "Gerunds & Infinitives", text: "He admitted _______ the bicycle without permission.", options: ["stealing", "to steal", "stolen"], correct: "stealing", rule: "Na het werkwoord 'admit' volgt een <b>gerund</b> (werkwoord + -ing)." }
+  { level: 4, category: "advanced", categoryName: "Gerunds & Infinitives", text: "He admitted _______ the bicycle without permission.", options: ["stealing", "to steal", "stolen"], rule: "Na het werkwoord 'admit' volgt een <b>gerund</b> (werkwoord + -ing).", correct: "stealing" }
 ];
 
 const levelNames = {
@@ -37,6 +37,48 @@ const levelNames = {
   3: "Derde klas",
   4: "Bovenbouw"
 };
+
+// DOM Elementen
+const startModal = document.getElementById('startModal');
+const startGameBtn = document.getElementById('startGameBtn');
+const helpBtn = document.getElementById('helpBtn');
+
+const levelSelect = document.getElementById('levelSelect');
+const categorySelect = document.getElementById('categorySelect');
+const timerSelect = document.getElementById('timerSelect');
+const soundToggleBtn = document.getElementById('soundToggleBtn');
+
+const btn1Player = document.getElementById('btn1Player');
+const btn2Players = document.getElementById('btn2Players');
+const statusX = document.getElementById('statusX');
+const statusO = document.getElementById('statusO');
+const scoreXEl = document.getElementById('scoreX');
+const scoreOEl = document.getElementById('scoreO');
+const playerOName = document.getElementById('playerOName');
+
+const cells = document.querySelectorAll('.cell');
+const messageDisplay = document.getElementById('message');
+const newGameBtn = document.getElementById('newGameBtn');
+const resetScoreBtn = document.getElementById('resetScoreBtn');
+
+const statTotal = document.getElementById('statTotal');
+const statCorrect = document.getElementById('statCorrect');
+const statAccuracy = document.getElementById('statAccuracy');
+
+// Modal Vraag Elementen
+const overlay = document.getElementById('questionOverlay');
+const modalCategoryTag = document.getElementById('modalCategoryTag');
+const modalLevelBadge = document.getElementById('modalLevelBadge');
+const modalPlayerInfo = document.getElementById('modalPlayerInfo');
+const questionText = document.getElementById('questionText');
+const optionsContainer = document.getElementById('optionsContainer');
+const explanationCard = document.getElementById('explanationCard');
+const retryQuestionBtn = document.getElementById('retryQuestionBtn');
+
+// Timer Elementen
+const timerBarContainer = document.getElementById('timerBarContainer');
+const timerDisplay = document.getElementById('timerDisplay');
+const timerBar = document.getElementById('timerBar');
 
 // Spelstatus Variabelen
 let currentLevel = 1;
@@ -58,14 +100,6 @@ let remainingTime = 0;
 let lastFailedQuestion = null;
 let isAudioMuted = false;
 
-// DOM Elementen
-let startModal, startGameBtn, helpBtn, levelSelect, categorySelect, timerSelect, soundToggleBtn;
-let btn1Player, btn2Players, statusX, statusO, scoreXEl, scoreOEl, playerOName;
-let cells, messageDisplay, newGameBtn, resetScoreBtn;
-let statTotal, statCorrect, statAccuracy;
-let overlay, modalCategoryTag, modalLevelBadge, modalPlayerInfo, questionText, optionsContainer, explanationCard, retryQuestionBtn;
-let timerBarContainer, timerDisplay, timerBar;
-
 const winningConditions = [
   [0, 1, 2], [3, 4, 5], [6, 7, 8],
   [0, 3, 6], [1, 4, 7], [2, 5, 8],
@@ -78,9 +112,6 @@ const soundFX = {
   init() {
     if (!this.ctx) {
       this.ctx = new (window.AudioContext || window.webkitAudioContext)();
-    }
-    if (this.ctx && this.ctx.state === 'suspended') {
-      this.ctx.resume();
     }
   },
   playTone(freq, type, duration, gainVal = 0.1) {
@@ -119,91 +150,37 @@ const soundFX = {
   }
 };
 
-function bindDOMElements() {
-  startModal = document.getElementById('startModal');
-  startGameBtn = document.getElementById('startGameBtn');
-  helpBtn = document.getElementById('helpBtn');
-
-  levelSelect = document.getElementById('levelSelect');
-  categorySelect = document.getElementById('categorySelect');
-  timerSelect = document.getElementById('timerSelect');
-  soundToggleBtn = document.getElementById('soundToggleBtn');
-
-  btn1Player = document.getElementById('btn1Player');
-  btn2Players = document.getElementById('btn2Players');
-  statusX = document.getElementById('statusX');
-  statusO = document.getElementById('statusO');
-  scoreXEl = document.getElementById('scoreX');
-  scoreOEl = document.getElementById('scoreO');
-  playerOName = document.getElementById('playerOName');
-
-  cells = document.querySelectorAll('.cell');
-  messageDisplay = document.getElementById('message');
-  newGameBtn = document.getElementById('newGameBtn');
-  resetScoreBtn = document.getElementById('resetScoreBtn');
-
-  statTotal = document.getElementById('statTotal');
-  statCorrect = document.getElementById('statCorrect');
-  statAccuracy = document.getElementById('statAccuracy');
-
-  overlay = document.getElementById('questionOverlay');
-  modalCategoryTag = document.getElementById('modalCategoryTag');
-  modalLevelBadge = document.getElementById('modalLevelBadge');
-  modalPlayerInfo = document.getElementById('modalPlayerInfo');
-  questionText = document.getElementById('questionText');
-  optionsContainer = document.getElementById('optionsContainer');
-  explanationCard = document.getElementById('explanationCard');
-  retryQuestionBtn = document.getElementById('retryQuestionBtn');
-
-  timerBarContainer = document.getElementById('timerBarContainer');
-  timerDisplay = document.getElementById('timerDisplay');
-  timerBar = document.getElementById('timerBar');
-}
-
 function initGame() {
-  bindDOMElements();
+  startGameBtn.addEventListener('click', () => {
+    soundFX.playClick();
+    startModal.style.display = 'none';
+  });
 
-  if (startGameBtn) {
-    startGameBtn.addEventListener('click', () => {
-      soundFX.playClick();
-      if (startModal) startModal.style.display = 'none';
-    });
-  }
+  helpBtn.addEventListener('click', () => {
+    soundFX.playClick();
+    startModal.style.display = 'flex';
+  });
 
-  if (helpBtn) {
-    helpBtn.addEventListener('click', () => {
-      soundFX.playClick();
-      if (startModal) startModal.style.display = 'flex';
-    });
-  }
+  soundToggleBtn.addEventListener('click', () => {
+    isAudioMuted = !isAudioMuted;
+    soundToggleBtn.textContent = isAudioMuted ? '🔇' : '🔊';
+  });
 
-  if (soundToggleBtn) {
-    soundToggleBtn.addEventListener('click', () => {
-      isAudioMuted = !isAudioMuted;
-      soundToggleBtn.textContent = isAudioMuted ? '🔇' : '🔊';
-    });
-  }
+  cells.forEach(cell => cell.addEventListener('click', handleCellClick));
+  newGameBtn.addEventListener('click', () => { soundFX.playClick(); restartGame(); });
+  resetScoreBtn.addEventListener('click', () => { soundFX.playClick(); resetAllScores(); });
 
-  if (cells) {
-    cells.forEach(cell => cell.addEventListener('click', handleCellClick));
-  }
+  btn1Player.addEventListener('click', () => { soundFX.playClick(); setMode(true); });
+  btn2Players.addEventListener('click', () => { soundFX.playClick(); setMode(false); });
 
-  if (newGameBtn) newGameBtn.addEventListener('click', () => { soundFX.playClick(); restartGame(); });
-  if (resetScoreBtn) resetScoreBtn.addEventListener('click', () => { soundFX.playClick(); resetAllScores(); });
+  categorySelect.addEventListener('change', () => { soundFX.playClick(); restartGame(); });
+  levelSelect.addEventListener('change', () => {
+    soundFX.playClick();
+    currentLevel = parseInt(levelSelect.value);
+    restartGame();
+  });
 
-  if (btn1Player) btn1Player.addEventListener('click', () => { soundFX.playClick(); setMode(true); });
-  if (btn2Players) btn2Players.addEventListener('click', () => { soundFX.playClick(); setMode(false); });
-
-  if (categorySelect) categorySelect.addEventListener('change', () => { soundFX.playClick(); restartGame(); });
-  if (levelSelect) {
-    levelSelect.addEventListener('change', () => {
-      soundFX.playClick();
-      currentLevel = parseInt(levelSelect.value);
-      restartGame();
-    });
-  }
-
-  if (retryQuestionBtn) retryQuestionBtn.addEventListener('click', handleRetryQuestion);
+  retryQuestionBtn.addEventListener('click', handleRetryQuestion);
 
   filterAndPrepareQuestions();
   restartGame();
@@ -211,9 +188,9 @@ function initGame() {
 
 function setMode(single) {
   isSinglePlayer = single;
-  if (btn1Player) btn1Player.classList.toggle('active', single);
-  if (btn2Players) btn2Players.classList.toggle('active', !single);
-  if (playerOName) playerOName.textContent = single ? 'O Computer' : 'O Speler O';
+  btn1Player.classList.toggle('active', single);
+  btn2Players.classList.toggle('active', !single);
+  playerOName.textContent = single ? 'O Computer' : 'O Speler O';
   restartGame();
 }
 
@@ -225,9 +202,337 @@ function shuffleArray(array) {
 }
 
 function filterAndPrepareQuestions() {
-  const selectedCategory = categorySelect ? categorySelect.value : 'all';
-  currentLevel = levelSelect ? parseInt(levelSelect.value) : 1;
+  const selectedCategory = categorySelect.value;
+  currentLevel = parseInt(levelSelect.value);
 
   availableQuestions = questionDatabase.filter(q => {
     const matchesLevel = q.level === currentLevel;
-    const matchesCategory = selectedCategory === 'all' || q.category === selected
+    const matchesCategory = selectedCategory === 'all' || q.category === selectedCategory;
+    return matchesLevel && matchesCategory;
+  });
+
+  if (availableQuestions.length === 0) {
+    availableQuestions = questionDatabase.filter(q => q.level === currentLevel);
+  }
+
+  shuffleArray(availableQuestions);
+}
+
+function handleCellClick(e) {
+  if (isComputerThinking || !gameActive) return;
+
+  const clickedCell = e.currentTarget || e.target;
+  currentCellIndex = parseInt(clickedCell.getAttribute('data-index'));
+
+  if (gameState[currentCellIndex] !== '') return;
+
+  soundFX.playClick();
+
+  if (availableQuestions.length === 0) {
+    filterAndPrepareQuestions();
+  }
+
+  const question = availableQuestions.pop();
+  showQuestionModal(question);
+}
+
+function showQuestionModal(question) {
+  lastFailedQuestion = question;
+  modalCategoryTag.textContent = question.categoryName || "Grammatica";
+  
+  modalLevelBadge.textContent = levelNames[question.level] || `Level ${question.level}`;
+  modalLevelBadge.className = `level-badge level-${question.level}-tag`;
+
+  modalPlayerInfo.textContent = `Speler ${currentPlayer}, vul het juiste antwoord in:`;
+  modalPlayerInfo.className = `modal-title ${currentPlayer === 'X' ? 'player-x' : 'player-o'}`;
+
+  const formattedText = question.text.replace('_______', '<u>_______</u>');
+  questionText.innerHTML = formattedText;
+
+  optionsContainer.innerHTML = '';
+  explanationCard.style.display = 'none';
+  retryQuestionBtn.style.display = 'none';
+
+  let shuffledOptions = [...question.options];
+  shuffleArray(shuffledOptions);
+
+  shuffledOptions.forEach(option => {
+    const btn = document.createElement('button');
+    btn.classList.add('option-btn');
+    btn.textContent = option;
+    btn.addEventListener('click', () => {
+      soundFX.playClick();
+      handleAnswer(option, question, btn);
+    });
+    optionsContainer.appendChild(btn);
+  });
+
+  overlay.style.display = 'flex';
+
+  const timerLimit = parseInt(timerSelect.value);
+  if (timerLimit > 0) {
+    startTimer(timerLimit, question);
+  } else {
+    timerBarContainer.style.display = 'none';
+  }
+}
+
+function startTimer(seconds, question) {
+  clearInterval(questionTimerInterval);
+  remainingTime = seconds;
+  timerBarContainer.style.display = 'block';
+  timerDisplay.textContent = `${remainingTime}s`;
+  timerBar.style.width = '100%';
+  timerBar.style.backgroundColor = '#1dd1a1';
+
+  questionTimerInterval = setInterval(() => {
+    remainingTime--;
+    timerDisplay.textContent = `${remainingTime}s`;
+    const percentage = (remainingTime / seconds) * 100;
+    timerBar.style.width = `${percentage}%`;
+
+    if (remainingTime <= 3) {
+      timerBar.style.backgroundColor = '#ff4757';
+      soundFX.playTick();
+    }
+
+    if (remainingTime <= 0) {
+      clearInterval(questionTimerInterval);
+      handleTimeout(question);
+    }
+  }, 1000);
+}
+
+function handleTimeout(question) {
+  const optionButtons = optionsContainer.querySelectorAll('.option-btn');
+  optionButtons.forEach(btn => btn.disabled = true);
+
+  totalQuestionsAnswered++;
+  soundFX.playWrong();
+
+  explanationCard.className = 'explanation-card error';
+  explanationCard.innerHTML = `<strong>⏰ Tijd is om!</strong> Het goede antwoord was: <b>${question.correct}</b>.<br><br><b>Uitleg:</b> ${question.rule}`;
+  explanationCard.style.display = 'block';
+  retryQuestionBtn.style.display = 'inline-block';
+
+  setTimeout(() => {
+    if (retryQuestionBtn.style.display === 'none') return; 
+    overlay.style.display = 'none';
+    updateStatsUI();
+    switchPlayer();
+  }, 3000);
+}
+
+function handleAnswer(selectedOption, question, clickedBtn) {
+  clearInterval(questionTimerInterval);
+
+  const optionButtons = optionsContainer.querySelectorAll('.option-btn');
+  optionButtons.forEach(btn => btn.disabled = true);
+
+  totalQuestionsAnswered++;
+
+  if (selectedOption === question.correct) {
+    totalCorrectAnswers++;
+    clickedBtn.classList.add('correct-btn');
+    explanationCard.className = 'explanation-card success';
+    explanationCard.innerHTML = `<strong>✨ Goed geantwoord!</strong><br>${question.rule}`;
+    explanationCard.style.display = 'block';
+    soundFX.playCorrect();
+
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      updateCell(cells[currentCellIndex], currentCellIndex);
+      checkWinCondition();
+      updateStatsUI();
+    }, 1200);
+  } else {
+    clickedBtn.classList.add('wrong-btn');
+    optionButtons.forEach(btn => {
+      if (btn.textContent === question.correct) {
+        btn.classList.add('correct-btn');
+      }
+    });
+    explanationCard.className = 'explanation-card error';
+    explanationCard.innerHTML = `<strong>❌ Helaas, dat is onjuist!</strong> Het goede antwoord is: <b>${question.correct}</b>.<br><br><b>Uitleg:</b> ${question.rule}`;
+    explanationCard.style.display = 'block';
+    soundFX.playWrong();
+
+    retryQuestionBtn.style.display = 'inline-block';
+
+    setTimeout(() => {
+      if (overlay.style.display !== 'none' && retryQuestionBtn.dataset.clicked !== 'true') {
+        overlay.style.display = 'none';
+        updateStatsUI();
+        switchPlayer();
+      }
+      retryQuestionBtn.dataset.clicked = 'false';
+    }, 3200);
+  }
+}
+
+function handleRetryQuestion() {
+  soundFX.playClick();
+  retryQuestionBtn.dataset.clicked = 'true';
+  
+  let similarQuestions = questionDatabase.filter(q => 
+    q.category === lastFailedQuestion.category && 
+    q.level === lastFailedQuestion.level &&
+    q.text !== lastFailedQuestion.text
+  );
+
+  if (similarQuestions.length === 0) {
+    similarQuestions = questionDatabase.filter(q => q.level === lastFailedQuestion.level);
+  }
+
+  const nextQuestion = similarQuestions[Math.floor(Math.random() * similarQuestions.length)];
+  showQuestionModal(nextQuestion);
+}
+
+function updateCell(cell, index) {
+  gameState[index] = currentPlayer;
+  cell.textContent = currentPlayer === 'X' ? 'X' : 'O';
+  cell.classList.add(currentPlayer.toLowerCase());
+}
+
+function switchPlayer() {
+  currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+
+  if (currentPlayer === 'X') {
+    statusX.classList.add('active');
+    statusO.classList.remove('active');
+    isComputerThinking = false;
+    messageDisplay.textContent = isSinglePlayer 
+      ? 'Jouw beurt! Klik op een vakje om een vraag te beantwoorden.' 
+      : 'Speler X is aan de beurt!';
+  } else {
+    statusO.classList.add('active');
+    statusX.classList.remove('active');
+
+    if (isSinglePlayer && gameActive) {
+      isComputerThinking = true;
+      messageDisplay.textContent = '🤖 Computer denkt na...';
+      setTimeout(makeComputerMove, 800);
+    } else {
+      messageDisplay.textContent = 'Speler O is aan de beurt!';
+    }
+  }
+}
+
+function makeComputerMove() {
+  if (!gameActive) return;
+
+  let emptyCells = [];
+  gameState.forEach((val, idx) => {
+    if (val === '') emptyCells.push(idx);
+  });
+
+  if (emptyCells.length === 0) return;
+
+  let move = findBestMove('O');
+  if (move === null) move = findBestMove('X');
+  if (move === null && emptyCells.includes(4)) move = 4;
+  if (move === null) {
+    move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+  }
+
+  currentCellIndex = move;
+  updateCell(cells[move], move);
+  soundFX.playPop();
+  checkWinCondition();
+  isComputerThinking = false;
+}
+
+function findBestMove(player) {
+  for (let condition of winningConditions) {
+    let [a, b, c] = condition;
+    let vals = [gameState[a], gameState[b], gameState[c]];
+    if (vals.filter(v => v === player).length === 2 && vals.filter(v => v === '').length === 1) {
+      if (gameState[a] === '') return a;
+      if (gameState[b] === '') return b;
+      if (gameState[c] === '') return c;
+    }
+  }
+  return null;
+}
+
+function checkWinCondition() {
+  let roundWon = false;
+  let winningLine = [];
+
+  for (let i = 0; i < winningConditions.length; i++) {
+    const [a, b, c] = winningConditions[i];
+    if (gameState[a] !== '' && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+      roundWon = true;
+      winningLine = [a, b, c];
+      break;
+    }
+  }
+
+  if (roundWon) {
+    gameActive = false;
+    winningLine.forEach(idx => cells[idx].classList.add('winning-cell'));
+    soundFX.playWin();
+
+    if (typeof confetti === 'function') {
+      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    }
+
+    if (currentPlayer === 'X') {
+      scoreX++;
+      scoreXEl.textContent = `${scoreX} winst`;
+      messageDisplay.textContent = '🎉 Speler X heeft gewonnen!';
+    } else {
+      scoreO++;
+      scoreOEl.textContent = `${scoreO} winst`;
+      messageDisplay.textContent = isSinglePlayer ? '💻 De computer heeft gewonnen!' : '🎉 Speler O heeft gewonnen!';
+    }
+    return;
+  }
+
+  if (!gameState.includes('')) {
+    gameActive = false;
+    messageDisplay.textContent = '🤝 Gelijkspel!';
+    return;
+  }
+
+  switchPlayer();
+}
+
+function restartGame() {
+  clearInterval(questionTimerInterval);
+  currentPlayer = 'X';
+  gameState = ['', '', '', '', '', '', '', '', ''];
+  gameActive = true;
+  isComputerThinking = false;
+
+  cells.forEach(cell => {
+    cell.textContent = '';
+    cell.className = 'cell';
+  });
+
+  statusX.classList.add('active');
+  statusO.classList.remove('active');
+  messageDisplay.textContent = 'Klik op een leeg vakje om een vraag te beantwoorden!';
+
+  filterAndPrepareQuestions();
+}
+
+function resetAllScores() {
+  scoreX = 0;
+  scoreO = 0;
+  totalQuestionsAnswered = 0;
+  totalCorrectAnswers = 0;
+  scoreXEl.textContent = '0 winst';
+  scoreOEl.textContent = '0 winst';
+  updateStatsUI();
+  restartGame();
+}
+
+function updateStatsUI() {
+  statTotal.textContent = totalQuestionsAnswered;
+  statCorrect.textContent = totalCorrectAnswers;
+  const acc = totalQuestionsAnswered > 0 ? Math.round((totalCorrectAnswers / totalQuestionsAnswered) * 100) : 0;
+  statAccuracy.textContent = `${acc}%`;
+}
+
+window.addEventListener('DOMContentLoaded', initGame);
