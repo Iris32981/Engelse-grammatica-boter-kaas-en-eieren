@@ -28,7 +28,7 @@ const questionDatabase = [
   { level: 4, category: "advanced", categoryName: "Passive Voice", text: "The new library _______ built by workers last year.", options: ["was", "is", "has been"], correct: "was", rule: "Lijdende vorm (Passive) in het verleden: <b>was/were + voltooid deelwoord</b>." },
   { level: 4, category: "advanced", categoryName: "Conditionals", text: "If I _______ you, I would accept that job offer immediately.", options: ["were", "am", "would be"], correct: "were", rule: "Second Conditional (hypothetisch): 'If I <b>were</b> you' (subjunctive mood)." },
   { level: 4, category: "advanced", categoryName: "Conditionals", text: "Had I known about the party, I _______ come.", options: ["would have", "will have", "would"], correct: "would have", rule: "Third Conditional (onmogelijk verleden): <b>Had + voltooid deelwoord, would have + voltooid deelwoord</b>." },
-  { level: 4, category: "advanced", categoryName: "Gerunds & Infinitives", text: "He admitted _______ the bicycle without permission.", options: ["stealing", "to steal", "stolen"], rule: "Na het werkwoord 'admit' volgt een <b>gerund</b> (werkwoord + -ing).", correct: "stealing" }
+  { level: 4, category: "advanced", categoryName: "Gerunds & Infinitives", text: "He admitted _______ the bicycle without permission.", options: ["stealing", "to steal", "stolen"], correct: "stealing", rule: "Na het werkwoord 'admit' volgt een <b>gerund</b> (werkwoord + -ing)." }
 ];
 
 const levelNames = {
@@ -311,16 +311,17 @@ function handleTimeout(question) {
   soundFX.playWrong();
 
   explanationCard.className = 'explanation-card error';
-  explanationCard.innerHTML = `<strong>⏰ Tijd is om!</strong> Het goede antwoord was: <b>${question.correct}</b>.<br><br><b>Uitleg:</b> ${question.rule}`;
+  explanationCard.innerHTML = `<strong>⏰ Tijd is om!</strong> Het goede antwoord was: <b>${question.correct}</b>.<br><br><b>Uitleg:</b>${question.rule}`;
   explanationCard.style.display = 'block';
   retryQuestionBtn.style.display = 'inline-block';
 
+  // Verlengd naar 5000ms (5 seconden) om de feedback te kunnen lezen
   setTimeout(() => {
     if (retryQuestionBtn.style.display === 'none') return; 
     overlay.style.display = 'none';
     updateStatsUI();
     switchPlayer();
-  }, 3000);
+  }, 5000);
 }
 
 function handleAnswer(selectedOption, question, clickedBtn) {
@@ -339,12 +340,13 @@ function handleAnswer(selectedOption, question, clickedBtn) {
     explanationCard.style.display = 'block';
     soundFX.playCorrect();
 
+    // Verlengd naar 3000ms (3 seconden) om de feedback te kunnen lezen
     setTimeout(() => {
       overlay.style.display = 'none';
       updateCell(cells[currentCellIndex], currentCellIndex);
       checkWinCondition();
       updateStatsUI();
-    }, 1200);
+    }, 3000);
   } else {
     clickedBtn.classList.add('wrong-btn');
     optionButtons.forEach(btn => {
@@ -353,186 +355,4 @@ function handleAnswer(selectedOption, question, clickedBtn) {
       }
     });
     explanationCard.className = 'explanation-card error';
-    explanationCard.innerHTML = `<strong>❌ Helaas, dat is onjuist!</strong> Het goede antwoord is: <b>${question.correct}</b>.<br><br><b>Uitleg:</b> ${question.rule}`;
-    explanationCard.style.display = 'block';
-    soundFX.playWrong();
-
-    retryQuestionBtn.style.display = 'inline-block';
-
-    setTimeout(() => {
-      if (overlay.style.display !== 'none' && retryQuestionBtn.dataset.clicked !== 'true') {
-        overlay.style.display = 'none';
-        updateStatsUI();
-        switchPlayer();
-      }
-      retryQuestionBtn.dataset.clicked = 'false';
-    }, 3200);
-  }
-}
-
-function handleRetryQuestion() {
-  soundFX.playClick();
-  retryQuestionBtn.dataset.clicked = 'true';
-  
-  let similarQuestions = questionDatabase.filter(q => 
-    q.category === lastFailedQuestion.category && 
-    q.level === lastFailedQuestion.level &&
-    q.text !== lastFailedQuestion.text
-  );
-
-  if (similarQuestions.length === 0) {
-    similarQuestions = questionDatabase.filter(q => q.level === lastFailedQuestion.level);
-  }
-
-  const nextQuestion = similarQuestions[Math.floor(Math.random() * similarQuestions.length)];
-  showQuestionModal(nextQuestion);
-}
-
-function updateCell(cell, index) {
-  gameState[index] = currentPlayer;
-  cell.textContent = currentPlayer === 'X' ? 'X' : 'O';
-  cell.classList.add(currentPlayer.toLowerCase());
-}
-
-function switchPlayer() {
-  currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-
-  if (currentPlayer === 'X') {
-    statusX.classList.add('active');
-    statusO.classList.remove('active');
-    isComputerThinking = false;
-    messageDisplay.textContent = isSinglePlayer 
-      ? 'Jouw beurt! Klik op een vakje om een vraag te beantwoorden.' 
-      : 'Speler X is aan de beurt!';
-  } else {
-    statusO.classList.add('active');
-    statusX.classList.remove('active');
-
-    if (isSinglePlayer && gameActive) {
-      isComputerThinking = true;
-      messageDisplay.textContent = '🤖 Computer denkt na...';
-      setTimeout(makeComputerMove, 800);
-    } else {
-      messageDisplay.textContent = 'Speler O is aan de beurt!';
-    }
-  }
-}
-
-function makeComputerMove() {
-  if (!gameActive) return;
-
-  let emptyCells = [];
-  gameState.forEach((val, idx) => {
-    if (val === '') emptyCells.push(idx);
-  });
-
-  if (emptyCells.length === 0) return;
-
-  let move = findBestMove('O');
-  if (move === null) move = findBestMove('X');
-  if (move === null && emptyCells.includes(4)) move = 4;
-  if (move === null) {
-    move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-  }
-
-  currentCellIndex = move;
-  updateCell(cells[move], move);
-  soundFX.playPop();
-  checkWinCondition();
-  isComputerThinking = false;
-}
-
-function findBestMove(player) {
-  for (let condition of winningConditions) {
-    let [a, b, c] = condition;
-    let vals = [gameState[a], gameState[b], gameState[c]];
-    if (vals.filter(v => v === player).length === 2 && vals.filter(v => v === '').length === 1) {
-      if (gameState[a] === '') return a;
-      if (gameState[b] === '') return b;
-      if (gameState[c] === '') return c;
-    }
-  }
-  return null;
-}
-
-function checkWinCondition() {
-  let roundWon = false;
-  let winningLine = [];
-
-  for (let i = 0; i < winningConditions.length; i++) {
-    const [a, b, c] = winningConditions[i];
-    if (gameState[a] !== '' && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
-      roundWon = true;
-      winningLine = [a, b, c];
-      break;
-    }
-  }
-
-  if (roundWon) {
-    gameActive = false;
-    winningLine.forEach(idx => cells[idx].classList.add('winning-cell'));
-    soundFX.playWin();
-
-    if (typeof confetti === 'function') {
-      confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-    }
-
-    if (currentPlayer === 'X') {
-      scoreX++;
-      scoreXEl.textContent = `${scoreX} winst`;
-      messageDisplay.textContent = '🎉 Speler X heeft gewonnen!';
-    } else {
-      scoreO++;
-      scoreOEl.textContent = `${scoreO} winst`;
-      messageDisplay.textContent = isSinglePlayer ? '💻 De computer heeft gewonnen!' : '🎉 Speler O heeft gewonnen!';
-    }
-    return;
-  }
-
-  if (!gameState.includes('')) {
-    gameActive = false;
-    messageDisplay.textContent = '🤝 Gelijkspel!';
-    return;
-  }
-
-  switchPlayer();
-}
-
-function restartGame() {
-  clearInterval(questionTimerInterval);
-  currentPlayer = 'X';
-  gameState = ['', '', '', '', '', '', '', '', ''];
-  gameActive = true;
-  isComputerThinking = false;
-
-  cells.forEach(cell => {
-    cell.textContent = '';
-    cell.className = 'cell';
-  });
-
-  statusX.classList.add('active');
-  statusO.classList.remove('active');
-  messageDisplay.textContent = 'Klik op een leeg vakje om een vraag te beantwoorden!';
-
-  filterAndPrepareQuestions();
-}
-
-function resetAllScores() {
-  scoreX = 0;
-  scoreO = 0;
-  totalQuestionsAnswered = 0;
-  totalCorrectAnswers = 0;
-  scoreXEl.textContent = '0 winst';
-  scoreOEl.textContent = '0 winst';
-  updateStatsUI();
-  restartGame();
-}
-
-function updateStatsUI() {
-  statTotal.textContent = totalQuestionsAnswered;
-  statCorrect.textContent = totalCorrectAnswers;
-  const acc = totalQuestionsAnswered > 0 ? Math.round((totalCorrectAnswers / totalQuestionsAnswered) * 100) : 0;
-  statAccuracy.textContent = `${acc}%`;
-}
-
-window.addEventListener('DOMContentLoaded', initGame);
+    explanationCard.innerHTML = `<strong>❌ Helaas, dat is onjuist!</strong> Het goede antwoord is: <b>${question.correct}</b>.<br><br><b>Uitle
