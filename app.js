@@ -305,7 +305,6 @@ function showQuestionModal(question) {
   if (explanationCard) explanationCard.style.display = 'none';
   if (retryQuestionBtn) retryQuestionBtn.style.display = 'none';
 
-  // Meerkeuze óf Typ-vraag weergave
   if (question.type === "input") {
     const inputWrapper = document.createElement('div');
     inputWrapper.className = 'text-input-container';
@@ -359,7 +358,6 @@ function showQuestionModal(question) {
 
   if (overlay) overlay.style.display = 'flex';
 
-  // Timer berekenen
   let timerLimit = 0;
   if (timerSelect) {
     if (timerSelect.value === 'custom') {
@@ -419,7 +417,6 @@ function handleTimeout(question) {
   }
   if (retryQuestionBtn) retryQuestionBtn.style.display = 'inline-block';
 
-  // 5 seconden leestijd
   setTimeout(() => {
     if (retryQuestionBtn && retryQuestionBtn.style.display === 'none') return; 
     if (overlay) overlay.style.display = 'none';
@@ -461,7 +458,6 @@ function handleAnswer(selectedOption, question, activeEl, textInputEl) {
     }
     soundFX.playCorrect();
 
-    // 3 seconden leestijd
     setTimeout(() => {
       if (overlay) overlay.style.display = 'none';
       updateCell(cells[currentCellIndex], currentCellIndex);
@@ -483,7 +479,6 @@ function handleAnswer(selectedOption, question, activeEl, textInputEl) {
 
     if (retryQuestionBtn) retryQuestionBtn.style.display = 'inline-block';
 
-    // 5 seconden leestijd
     setTimeout(() => {
       if (overlay && overlay.style.display !== 'none' && retryQuestionBtn && retryQuestionBtn.dataset.clicked !== 'true') {
         overlay.style.display = 'none';
@@ -546,7 +541,7 @@ function switchPlayer() {
   }
 }
 
-// Aangepaste, minder slimme Computer AI voor meer speelplezier!
+// MINDER SLIMME ROBOT AI (Maakt veel meer menselijke foutjes!)
 function makeComputerMove() {
   if (!gameActive) return;
 
@@ -559,15 +554,21 @@ function makeComputerMove() {
 
   let move = null;
 
-  // 40% Kans dat de computer een willekeurige zet doet (foutje maakt)
-  const makesMistake = Math.random() < 0.4;
+  // Robot slimheid instellingen:
+  // 1. Slechts 35% kans dat hij ziet dat hij zelf 3 op een rij kan maken.
+  // 2. Slechts 25% kans dat hij ziet dat jij 3 op een rij gaat maken (en je blokkeert).
+  const noticeWin = Math.random() < 0.35;
+  const noticeBlock = Math.random() < 0.25;
 
-  if (!makesMistake) {
+  if (noticeWin) {
     move = findBestMove('O'); // Probeer te winnen
-    if (move === null) move = findBestMove('X'); // Blokkeer de speler
-    if (move === null && emptyCells.includes(4) && Math.random() < 0.5) move = 4;
   }
 
+  if (move === null && noticeBlock) {
+    move = findBestMove('X'); // Blokkeer de speler
+  }
+
+  // Als de robot het niet zag of er geen directe kansen waren: kiest hij willekeurig!
   if (move === null) {
     move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
   }
