@@ -32,12 +32,25 @@ const questionDatabase = [
   { level: 3, type: "mc", category: "advanced", categoryName: "Conditionals", text: "If it rains tomorrow, we _______ stay indoors.", options: ["will", "would", "had"], correct: "will", rule: "First Conditional: <b>If + Present Simple, will + hele werkwoord</b>." },
   { level: 3, type: "input", category: "advanced", categoryName: "Conditionals", text: "If I have enough money, I _______ (buy) that coat.", correct: ["will buy"], rule: "First Conditional: <b>will + hele werkwoord</b> in de hoofdzin." },
 
-  // LEVEL 4 - BOVENBOUW
+  // LEVEL 4 - BOVENBOUW (Inclusief uitgebreide Conditionals & Passive Voice)
   { level: 4, type: "input", category: "advanced", categoryName: "Past Perfect", text: "By the time we arrived, the movie _______ (start) already.", correct: ["had started"], rule: "Past Perfect: <b>had + voltooid deelwoord</b> voor handelingen vóór een ander moment in het verleden." },
-  { level: 4, type: "mc", category: "advanced", categoryName: "Passive Voice", text: "The new library _______ built by workers last year.", options: ["was", "is", "has been"], correct: "was", rule: "Lijdende vorm (Passive) in het verleden: <b>was/were + voltooid deelwoord</b>." },
-  { level: 4, type: "input", category: "advanced", categoryName: "Passive Voice", text: "English _______ (speak) all over the world.", correct: ["is spoken"], rule: "Passive in de tegenwoordige tijd: <b>am/is/are + voltooid deelwoord</b>." },
-  { level: 4, type: "input", category: "advanced", categoryName: "Conditionals", text: "If I _______ (be) you, I would accept that job offer.", correct: ["were"], rule: "Second Conditional (hypothetisch): 'If I <b>were</b> you'." },
-  { level: 4, type: "mc", category: "advanced", categoryName: "Conditionals", text: "Had I known about the party, I _______ come.", options: ["would have", "will have", "would"], correct: "would have", rule: "Third Conditional: <b>Had + voltooid deelwoord, would have + voltooid deelwoord</b>." },
+  
+  // -- PASSIVE VOICE (Lijdende Vorm) --
+  { level: 4, type: "mc", category: "advanced", categoryName: "Passive Voice", text: "The new library _______ built by workers last year.", options: ["was", "is", "has been"], correct: "was", rule: "Lijdende vorm (Past Passive): <b>was/were + voltooid deelwoord</b>." },
+  { level: 4, type: "input", category: "advanced", categoryName: "Passive Voice", text: "English _______ (speak) all over the world.", correct: ["is spoken"], rule: "Passive in de tegenwoordige tijd (Present Passive): <b>am/is/are + voltooid deelwoord</b>." },
+  { level: 4, type: "mc", category: "advanced", categoryName: "Passive Voice", text: "All the tickets _______ sold out yesterday.", options: ["were", "was", "are"], correct: "were", rule: "Meervoud in de verleden tijd lijdende vorm: <b>were + voltooid deelwoord</b>." },
+  { level: 4, type: "input", category: "advanced", categoryName: "Passive Voice", text: "The homework must _______ (finish) before tomorrow.", correct: ["be finished"], rule: "Passive met hulpwerkwoord (Modal Passive): <b>modal + be + voltooid deelwoord</b>." },
+  { level: 4, type: "mc", category: "advanced", categoryName: "Passive Voice", text: "A new shopping mall _______ built in our town right now.", options: ["is being", "was", "has been"], correct: "is being", rule: "Present Continuous Passive: <b>is/are being + voltooid deelwoord</b>." },
+  { level: 4, type: "input", category: "advanced", categoryName: "Passive Voice", text: "The car _______ (repair) by the mechanic yesterday.", correct: ["was repaired"], rule: "Past Simple Passive: <b>was/were + voltooid deelwoord</b>." },
+
+  // -- CONDITIONALS (Voorwaardelijke Zinnen) --
+  { level: 4, type: "input", category: "advanced", categoryName: "Conditionals", text: "If I _______ (be) you, I would accept that job offer.", correct: ["were"], rule: "Second Conditional (hypothetisch): 'If I <b>were</b> you' (subjunctive mood)." },
+  { level: 4, type: "mc", category: "advanced", categoryName: "Conditionals", text: "Had I known about the party, I _______ come.", options: ["would have", "will have", "would"], correct: "would have", rule: "Third Conditional (onmogelijk verleden): <b>Had + voltooid deelwoord, would have + voltooid deelwoord</b>." },
+  { level: 4, type: "input", category: "advanced", categoryName: "Conditionals", text: "If she had studied harder, she _______ (pass) the exam.", correct: ["would have passed"], rule: "Third Conditional: <b>If + Past Perfect, would have + voltooid deelwoord</b>." },
+  { level: 4, type: "mc", category: "advanced", categoryName: "Conditionals", text: "If we had taken a map, we _______ lost.", options: ["wouldn't have got", "won't get", "wouldn't get"], correct: "wouldn't have got", rule: "Third Conditional (ontkennend): <b>wouldn't have + voltooid deelwoord</b>." },
+  { level: 4, type: "input", category: "advanced", categoryName: "Conditionals", text: "If you heat ice, it _______ (melt).", correct: ["melts"], rule: "Zero Conditional (algemene waarheid): <b>If + Present Simple, Present Simple</b>." },
+
+  // -- GERUNDS & OTHER ADVANCED --
   { level: 4, type: "input", category: "advanced", categoryName: "Gerunds & Infinitives", text: "He admitted _______ (steal) the bicycle.", correct: ["stealing"], rule: "Na het werkwoord 'admit' volgt een <b>gerund</b> (werkwoord + -ing)." }
 ];
 
@@ -547,7 +560,7 @@ function switchPlayer() {
   }
 }
 
-// HEEL MAKKELIJKE ROBOT AI (Kiest in 90% van de gevallen gewoon zomaar een vakje!)
+// MAKKELIJKE ROBOT AI (90% willekeurige zetten)
 function makeComputerMove() {
   if (!gameActive) return;
 
@@ -560,16 +573,13 @@ function makeComputerMove() {
 
   let move = null;
 
-  // 90% kans dat de robot TOTAAL willekeurig kiest (en je kansen negeert)
   const playsRandomly = Math.random() < 0.90;
 
   if (!playsRandomly) {
-    // Alleen in de overige 10% van de gevallen kijkt hij heel kort of hij ergens kan winnen of blokkeren
     move = findBestMove('O');
     if (move === null) move = findBestMove('X');
   }
 
-  // Als hij willekeurig kiest of geen zet vond: neem gewoon zomaar een leeg vakje
   if (move === null) {
     move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
   }
